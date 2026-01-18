@@ -360,3 +360,37 @@ body {
 .status-indicator.fechado .dot {
     background: #E31B22;
 }
+/* =========================================
+   AJUSTES PARA DINAMISMO (MUITO IMPORTANTE)
+   ========================================= */
+
+/* Garante que as listas de produtos comecem visíveis se necessário */
+.product-grid {
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+/* Estilo para quando a categoria estiver escondida (clique no título) */
+.product-grid.hidden {
+    display: none !important;
+}
+
+/* Badge flutuante de status no rodapé (Opcional, mas profissional) */
+.status-fixed-bottom {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* Ajuste de imagem para evitar que pizzas fiquem gigantes em telas pequenas */
+@media (max-width: 600px) {
+    .item-img-box img {
+        width: 120px;
+    }
+    .main-logo {
+        max-width: 200px;
+    }
+}

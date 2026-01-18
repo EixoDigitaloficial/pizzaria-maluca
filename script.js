@@ -1,65 +1,32 @@
-/* ============================================================
-   CONFIGURAÇÕES GERAIS - RENDER VERSION
-   ============================================================ */
 const API_BASE_URL = "https://pizzaria-maluca.onrender.com/api";
 let precosPizza = {}; 
-let configGeral = {};
-let carrinho = [];
 
-// 1. BUSCA DADOS DO SERVIDOR (PREÇOS E STATUS)
-async function carregarConfiguracoesDaAPI() {
+async function carregarDados() {
     try {
         const res = await fetch(`${API_BASE_URL}/config`);
-        configGeral = await res.json();
-        precosPizza = configGeral.precos;
-        
-        // Atualiza o status visual (Aberto/Fechado)
-        definirStatusLoja(configGeral.statusLoja === 'aberto');
-        
-        // ATENÇÃO: Chama a renderização após carregar os preços
-        renderizarMenu();
-    } catch (e) {
-        console.error("Erro ao conectar ao servidor Render:", e);
-    }
-}
+        const config = await res.json();
+        precosPizza = config.precos;
 
-// 2. DEFINE SE A LOJA ESTÁ ABERTA NO SITE
-function definirStatusLoja(aberto) {
-    const statusElement = document.getElementById('status-loja'); // Certifique-se que esse ID existe no HTML
-    if (statusElement) {
-        statusElement.innerText = aberto ? "Aberto" : "Fechado";
-        statusElement.className = aberto ? "status-aberto" : "status-fechado";
-    }
-}
+        // Atualiza Preços no Banner (IDs devem bater com o index.html)
+        if(document.getElementById('v-preco-p')) document.getElementById('v-preco-p').innerText = precosPizza.P.toFixed(2);
+        if(document.getElementById('v-preco-m')) document.getElementById('v-preco-m').innerText = precosPizza.M.toFixed(2);
+        if(document.getElementById('v-preco-g')) document.getElementById('v-preco-g').innerText = precosPizza.G.toFixed(2);
 
-// 3. RENDERIZA OS PRODUTOS NA TELA (ESTRUTURA DINÂMICA)
-function renderizarMenu() {
-    // Exemplo de como preencher os preços nas seções
-    // Você deve adaptar os IDs abaixo de acordo com seu HTML
-    if (document.getElementById('preco-p')) document.getElementById('preco-p').innerText = `R$ ${precosPizza.P.toFixed(2)}`;
-    if (document.getElementById('preco-m')) document.getElementById('preco-m').innerText = `R$ ${precosPizza.M.toFixed(2)}`;
-    if (document.getElementById('preco-g')) document.getElementById('preco-g').innerText = `R$ ${precosPizza.G.toFixed(2)}`;
-    
-    console.log("Cardápio atualizado com dados do Render!");
-}
-
-// 4. ENVIA O PEDIDO PARA O BANCO DE DADOS NO RENDER
-async function enviarPedidoParaAPI(dadosPedido) {
-    try {
-        const res = await fetch(`${API_BASE_URL}/pedidos/enviar`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dadosPedido)
-        });
-        if (res.ok) console.log("Pedido salvo no servidor!");
+        // Atualiza Status da Loja
+        const statusDiv = document.getElementById('status-loja');
+        if (statusDiv) {
+            statusDiv.innerHTML = config.statusLoja === 'aberto' ? '<span class="dot"></span> Aberto' : '<span class="dot-red"></span> Fechado';
+            statusDiv.className = `status-indicator ${config.statusLoja}`;
+        }
     } catch (e) { 
-        console.error("Erro ao salvar pedido:", e); 
+        console.error("Erro ao conectar ao servidor Render. O backend pode estar 'dormindo'."); 
     }
 }
 
-// INICIALIZAÇÃO AO CARREGAR A PÁGINA
-window.onload = async () => {
-    await carregarConfiguracoesDaAPI();
-};
+// Abre e fecha as categorias no clique
+function toggleCategoria(id) {
+    const lista = document.getElementById(`lista-${id}`);
+    if (lista) lista.classList.toggle('hidden');
+}
 
-/* Mantenha suas funções de 'Adicionar ao Carrinho' e 'Abrir Modal' abaixo desta linha */
+window.onload = carregarDados;
