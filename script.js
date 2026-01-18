@@ -6,7 +6,6 @@ let itemAtual = null;
 
 const limitesSabores = { "P": 1, "M": 2, "G": 3, "F": 3 };
 
-// Dados do Menu (Mantenha seu cardápio aqui)
 const menuPizzas = {
     tradicionais: [
         { nome: "Calabresa", desc: "Molho, muçarela, calabresa e cebola", img: "img/pizzas/pizza 01.png" },
@@ -21,13 +20,13 @@ const menuPizzas = {
     ]
 };
 
-// --- 1. SINCRONIZAÇÃO COM O SERVIDOR ---
 async function sincronizarComServidor() {
     try {
         const res = await fetch(`${API_BASE_URL}/config`);
         configGeral = await res.json();
         precosPizza = configGeral.precos;
 
+        // Atualiza Preços das Pizzas no Banner
         if(document.getElementById('v-preco-p')) document.getElementById('v-preco-p').innerText = precosPizza.P.toFixed(2);
         if(document.getElementById('v-preco-m')) document.getElementById('v-preco-m').innerText = precosPizza.M.toFixed(2);
         if(document.getElementById('v-preco-g')) document.getElementById('v-preco-g').innerText = precosPizza.G.toFixed(2);
@@ -42,10 +41,9 @@ async function sincronizarComServidor() {
         if(taxaEntregaEl) taxaEntregaEl.innerText = `R$ ${configGeral.taxaEntrega.toFixed(2)}`;
 
         renderizarMenu();
-    } catch (e) { console.error("Erro ao conectar ao servidor Render."); }
+    } catch (e) { console.error("Erro ao conectar ao servidor."); }
 }
 
-// --- 2. RENDERIZAÇÃO ---
 function renderizarMenu() {
     renderCategoria('lista-tradicionais', menuPizzas.tradicionais);
     renderCategoria('lista-gourmet', menuPizzas.gourmet);
@@ -72,19 +70,19 @@ function renderCategoria(id, lista) {
 
 function renderBebidas() {
     const box = document.getElementById('lista-bebidas');
-    if(!box || !configGeral.bebidas) return;
+    if(!box) return;
+    // Forçamos a criação dos cards de bebida para que eles não sumam
     box.innerHTML = `
         <div class="item-card"><img src="img/bebidas/agua 01.png" width="80"><h3>Água</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Agua')">ESCOLHER</button></div>
-        <div class="item-card"><img src="img/bebidas/Refrigerantes 01.png" width="80"><h3>Refri</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Refri')">ESCOLHER</button></div>
-        <div class="item-card"><img src="img/bebidas/sucos 01.png" width="80"><h3>Suco</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Suco')">ESCOLHER</button></div>`;
+        <div class="item-card"><img src="img/bebidas/Refrigerantes 01.png" width="80"><h3>Refrigerantes</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Refri')">ESCOLHER</button></div>
+        <div class="item-card"><img src="img/bebidas/sucos 01.png" width="80"><h3>Sucos Naturais</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Suco')">ESCOLHER</button></div>`;
 }
 
-// --- 3. MODAIS (Ajustado para somar valores corretamente) ---
 function abrirModalBebida(tipo) {
     const b = configGeral.bebidas;
     const container = document.getElementById('modal-options');
     container.innerHTML = "";
-    document.getElementById('modal-subtitle').innerText = "Selecione as opções:";
+    document.getElementById('modal-subtitle').innerText = "Selecione as opções abaixo:";
 
     if (tipo === 'Agua') {
         document.getElementById('modal-title').innerText = "Água Mineral";
@@ -96,15 +94,17 @@ function abrirModalBebida(tipo) {
     else if (tipo === 'Suco') {
         document.getElementById('modal-title').innerText = "Sucos Naturais";
         itemAtual = { tipo: 'bebida', nome: 'Suco' };
+        // Correção para mostrar tipo e sabores no mesmo modal
         container.innerHTML = `<b>Opção:</b><br>
-            <label><input type="radio" name="tipo_bebida" value="Com Leite|${b.sucocomLeite}"> Com Leite - R$ ${b.sucocomLeite.toFixed(2)}</label>
-            <label><input type="radio" name="tipo_bebida" value="Sem Leite|${b.sucosemLeite}"> Sem Leite - R$ ${b.sucosemLeite.toFixed(2)}</label><br>
+            <label><input type="radio" name="tipo_bebida" value="Com Leite|${b.sucocomLeite}"> Com Leite (R$ ${b.sucocomLeite.toFixed(2)})</label>
+            <label><input type="radio" name="tipo_bebida" value="Sem Leite|${b.sucosemLeite}"> Sem Leite (R$ ${b.sucosemLeite.toFixed(2)})</label><br>
             <b>Sabor:</b><br>` + 
-            ["Abacaxi", "Laranja", "Morango", "Acerola", "Maracujá"].map(s => `<label><input type="radio" name="sabor_bebida" value="${s}"> ${s}</label>`).join('');
+            ["Abacaxi", "Laranja", "Morango", "Acerola", "Maracujá", "Limão"].map(s => `<label><input type="radio" name="sabor_bebida" value="${s}"> ${s}</label>`).join('');
     }
     else if (tipo === 'Refri') {
         document.getElementById('modal-title').innerText = "Refrigerantes";
         itemAtual = { tipo: 'bebida', nome: 'Refri' };
+        // Correção para mostrar tamanhos e sabores
         container.innerHTML = `<b>Tamanho:</b><br>
             <label><input type="radio" name="tipo_bebida" value="1Lt|${b.refri1l}"> 1 Litro - R$ ${b.refri1l.toFixed(2)}</label>
             <label><input type="radio" name="tipo_bebida" value="2Lt|${b.refri2l}"> 2 Litros - R$ ${b.refri2l.toFixed(2)}</label><br>
@@ -120,13 +120,19 @@ function confirmarSelecao() {
         const saborB = document.querySelector('input[name="sabor_bebida"]:checked');
         const unica = document.querySelector('input[name="selecao_unica"]:checked');
 
+        let nomeFinal, precoFinal;
+
         if (unica) {
             const [n, p] = unica.value.split('|');
-            carrinho.push({ nome: `${itemAtual.nome} ${n}`, preco: parseFloat(p) });
+            nomeFinal = `${itemAtual.nome} ${n}`;
+            precoFinal = parseFloat(p);
         } else if (tipoB && saborB) {
             const [t, p] = tipoB.value.split('|');
-            carrinho.push({ nome: `${itemAtual.nome} ${saborB.value} (${t})`, preco: parseFloat(p) });
-        } else { return alert("Selecione as opções!"); }
+            nomeFinal = `${itemAtual.nome} ${saborB.value} (${t})`;
+            precoFinal = parseFloat(p);
+        } else { return alert("Por favor, selecione todas as opções!"); }
+
+        carrinho.push({ nome: nomeFinal, preco: precoFinal });
     } else {
         const sel = Array.from(document.querySelectorAll('input[name="selecao"]:checked')).map(i => i.value);
         if(sel.length === 0 || sel.length > itemAtual.limite) return alert("Escolha os sabores corretamente!");
@@ -139,14 +145,18 @@ function confirmarSelecao() {
 function atualizarCarrinho() {
     const itensDiv = document.getElementById('carrinho-itens');
     let sub = 0;
-    itensDiv.innerHTML = carrinho.map(i => { sub += i.preco; return `<div class="cart-item"><span>${i.nome}</span> <b>R$ ${i.preco.toFixed(2)}</b></div>` }).join('');
+    itensDiv.innerHTML = carrinho.map(i => { 
+        sub += i.preco; 
+        return `<div class="cart-item"><span>${i.nome}</span> <b>R$ ${i.preco.toFixed(2)}</b></div>`;
+    }).join('');
+    
     if(carrinho.length === 0) itensDiv.innerHTML = '<p class="empty-msg">Escolha seus sabores favoritos!</p>';
+    
     document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
     const entrega = sub > 0 ? configGeral.taxaEntrega : 0;
     document.getElementById('total-geral').innerText = `R$ ${(sub + entrega).toFixed(2)}`;
 }
 
-// Funções de Interface
 function abrirModalPizza(nome, tam) {
     itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limitesSabores[tam], preco: precosPizza[tam] };
     document.getElementById('modal-title').innerText = `Pizza ${tam} - ${nome}`;
@@ -155,6 +165,7 @@ function abrirModalPizza(nome, tam) {
     container.innerHTML = todos.map(s => `<label><input type="checkbox" name="selecao" value="${s.nome}"> ${s.nome}</label>`).join('');
     document.getElementById('modal-selecao').classList.remove('hidden');
 }
+
 function fecharModal() { document.getElementById('modal-selecao').classList.add('hidden'); }
 function limparCarrinho() { carrinho = []; atualizarCarrinho(); }
 function mudarPagina(p) { 
