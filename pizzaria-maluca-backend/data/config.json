@@ -8,5 +8,12 @@
     "G": 55,
     "F": 70
   },
+  "bebidas": {
+    "agua": 5.00,
+    "refri1l": 10.00,
+    "refri2l": 12.00,
+    "sucoLeite": 8.00,
+    "sucoAgua": 5.00
+  },
   "senhaMestre": "123456"
 }

@@ -54,7 +54,7 @@
             border: 1px solid #333; 
             background: #2a2a2a; 
             color: white; 
-            font-size: 16px; /* Evita zoom automático no iPhone */
+            font-size: 16px; 
         }
 
         .grid-precos {
@@ -87,7 +87,6 @@
             color: #e74c3c;
         }
 
-        /* Ajuste para telas muito pequenas */
         @media (max-width: 400px) {
             .grid-precos { grid-template-columns: 1fr; }
             .btn-logout { position: static; width: 100%; margin-bottom: 15px; }
@@ -131,6 +130,15 @@
                 <div class="form-group"><label>Pizza F:</label><input type="number" step="0.01" id="precoF"></div>
             </div>
 
+            <h3>Preços das Bebidas (R$)</h3>
+            <div class="grid-precos">
+                <div class="form-group"><label>Água:</label><input type="number" step="0.01" id="precoAgua"></div>
+                <div class="form-group"><label>Refri 1Lt:</label><input type="number" step="0.01" id="precoRefri1l"></div>
+                <div class="form-group"><label>Refri 2Lt:</label><input type="number" step="0.01" id="precoRefri2l"></div>
+                <div class="form-group"><label>Suco Leite:</label><input type="number" step="0.01" id="precoSucoLeite"></div>
+                <div class="form-group"><label>Suco Água:</label><input type="number" step="0.01" id="precoSucoAgua"></div>
+            </div>
+
             <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR ALTERAÇÕES</button>
         </form>
     </div>
@@ -157,10 +165,21 @@
                 document.getElementById('statusLoja').value = data.statusLoja;
                 document.getElementById('whatsapp').value = data.whatsapp;
                 document.getElementById('taxaEntrega').value = data.taxaEntrega;
+                
+                // Preenche Pizzas
                 document.getElementById('precoP').value = data.precos.P;
                 document.getElementById('precoM').value = data.precos.M;
                 document.getElementById('precoG').value = data.precos.G;
                 document.getElementById('precoF').value = data.precos.F;
+
+                // Preenche Bebidas
+                if(data.bebidas) {
+                    document.getElementById('precoAgua').value = data.bebidas.agua;
+                    document.getElementById('precoRefri1l').value = data.bebidas.refri1l;
+                    document.getElementById('precoRefri2l').value = data.bebidas.refri2l;
+                    document.getElementById('precoSucoLeite').value = data.bebidas.sucoLeite;
+                    document.getElementById('precoSucoAgua').value = data.bebidas.sucoAgua;
+                }
 
                 const badge = document.getElementById('status-atual');
                 badge.innerText = `Loja está: ${data.statusLoja}`;
@@ -184,6 +203,13 @@
                     M: parseFloat(document.getElementById('precoM').value),
                     G: parseFloat(document.getElementById('precoG').value),
                     F: parseFloat(document.getElementById('precoF').value)
+                },
+                bebidas: {
+                    agua: parseFloat(document.getElementById('precoAgua').value),
+                    refri1l: parseFloat(document.getElementById('precoRefri1l').value),
+                    refri2l: parseFloat(document.getElementById('precoRefri2l').value),
+                    sucoLeite: parseFloat(document.getElementById('precoSucoLeite').value),
+                    sucoAgua: parseFloat(document.getElementById('precoSucoAgua').value)
                 }
             };
 
