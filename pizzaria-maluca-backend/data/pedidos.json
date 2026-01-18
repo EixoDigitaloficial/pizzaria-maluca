@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1768757665805,
+    "dataHora": "18/01/2026, 14:34:25",
+    "cliente": "Diego Cutrim",
+    "endereco": "Rua da Ponte, 45- Centro",
+    "pagamento": "PIX",
+    "itens": [
+      {
+        "nome": "Pizza P (Calabresa)",
+        "preco": 35
+      }
+    ],
+    "total": "R$ 40.00"
+  }
+]

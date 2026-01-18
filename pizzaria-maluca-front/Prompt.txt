@@ -1,0 +1,30 @@
+O Prompt Mestre (Copie e cole):
+"Foto gastronômica profissional, estilo 'food porn', de uma pizza [INSERIR SABOR AQUI] inteira, extremamente suculenta e com aparência apetitosa. Massa artesanal com bordas levemente tostadas. A pizza deve estar centralizada e isolada em um fundo branco sólido e uniforme (flat white background), sem pratos ou talheres, preparada para recorte de design. Iluminação de estúdio vinda da lateral para destacar a textura dos ingredientes, alta resolução, 8k."
+Como preencher o campo [INSERIR SABOR AQUI] para cada uma:
+Para cada imagem que você quiser gerar, substitua os colchetes pelas descrições detalhadas abaixo para que a IA não erre os ingredientes:
+Portuguesa: "...Portuguesa, coberta com presunto, ovos cozidos fatiados, cebola, ervilha, milho e muçarela derretida."
+Marguerita: "...Marguerita, com molho de tomate vibrante, muçarela, rodelas de tomate cereja e folhas de manjericão fresco por cima."
+Frango com Catupiry: "...de Frango com Catupiry, com frango desfiado temperado e o requeijão cremoso fazendo um desenho circular por cima."
+Quatro Queijos: "...de Quatro Queijos, mostrando a mistura fundida de muçarela, provolone, parmesão e gotas de gorgonzola."
+Parma & Búfala: "...Gourmet de Presunto de Parma e Muçarela de Búfala, finalizada com folhas de rúcula fresca e gotas de pesto de tomate seco."
+Brie com Geleia de Pimenta: "...de Queijo Brie, com fatias generosas de brie derretido e brilho de geleia de pimenta vermelha por cima."
+Carne Seca com Abóbora: "...de Carne Seca desfiada com cebola roxa e cubos pequenos de abóbora cabotiá sobre muçarela."
+Shitake e Shimeji: "...de Cogumelos, com mistura de shitake e shimeji salteados na manteiga sobre queijo derretido."
+Chocolate com Morango: "...Doce de Chocolate, coberta com brigadeiro cremoso brilhante e morangos frescos fatiados por cima."
+Banoffe: "...Doce de Banoffe, com rodelas de banana, doce de leite abundante e uma leve chuva de canela em pó."
+Romeu e Julieta: "...Doce de Romeu e Julieta, com queijo derretido e fatias de goiabada cascão derretendo por cima."
+
+
+O Prompt Mestre para Bebidas (Copie e cole):
+"Fotografia publicitária de [INSERIR BEBIDA AQUI], em alta resolução, estilo 'commercial photography'. A bebida deve estar extremamente gelada, com gotas de condensação escorrendo pelo recipiente. Iluminação de estúdio brilhante, cores vibrantes e foco nítido. A imagem deve estar totalmente isolada em um fundo branco sólido e uniforme (flat white background), sem sombras pesadas, pronta para recorte de design. 8k, ultra detalhado."
+Como preencher o campo [INSERIR BEBIDA AQUI] para cada item:
+Para cada busca, substitua os colchetes pelo texto abaixo:
+Refrigerante Lata: "uma lata de refrigerante de cola de 350ml, com gotas de gelo e fatias de limão ao lado."
+Refrigerante 2 Litros: "uma garrafa de refrigerante de 2 litros de guaraná, com aspecto gelado e rótulo nítido."
+Suco Natural de Laranja: "um copo de vidro alto com suco de laranja natural, gelo e uma rodela de laranja na borda."
+Limonada Suíça: "um copo de vidro com limonada suíça espumante, pedras de gelo e folhas de hortelã."
+Cerveja Long Neck: "uma garrafa de cerveja long neck aberta, com o vidro 'suado' de gelado e colarinho de espuma saindo pelo topo."
+Cerveja Artesanal (IPA): "um copo tipo Pint cheio de cerveja artesanal âmbar, com espuma densa e persistente."
+Vinho Tinto: "uma taça de vinho tinto elegante, com o líquido rubi brilhante, mostrando o corpo do vinho."
+Vinho Branco/Frisante: "uma taça de vinho branco gelado, com leves gotas de condensação na taça transparente."
+Água Mineral: "uma garrafa de água mineral de 500ml de plástico transparente, com gotas de gelo e aparência refrescante."

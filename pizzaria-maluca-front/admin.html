@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pizzaria Maluca</title>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        .admin-container { padding: 20px; max-width: 600px; margin: auto; color: white; }
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        input, select { padding: 10px; border-radius: 5px; border: none; margin-top: 5px; background: #2a2a2a; color: white; }
+        .btn-salvar { background: #2ecc71; color: white; padding: 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; }
+        .btn-logout { background: #e74c3c; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; float: right; }
+        .status-badge { padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .aberto { background: #2ecc71; }
+        .fechado { background: #e74c3c; }
+        h3 { margin-top: 25px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+    </style>
+</head>
+<body style="background: #121212;">
+    <div class="admin-container">
+        <button class="btn-logout" onclick="logout()">Sair</button>
+        
+        <header style="text-align: center; margin-bottom: 30px;">
+            <img src="img/pizzas/LOGO PIZZA.png" width="100">
+            <h1>Painel de Controle</h1>
+        </header>
+
+        <div id="status-atual" class="status-badge">Carregando status...</div>
+
+        <form id="form-admin">
+            <div class="form-group">
+                <label>Status da Loja:</label>
+                <select id="statusLoja">
+                    <option value="aberto">Aberta</option>
+                    <option value="fechado">Fechada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>WhatsApp (com DDD):</label>
+                <input type="text" id="whatsapp">
+            </div>
+
+            <div class="form-group">
+                <label>Taxa de Entrega (R$):</label>
+                <input type="number" step="0.01" id="taxaEntrega">
+            </div>
+
+            <h3>Preços das Pizzas</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>Pizza P:</label><input type="number" id="precoP"></div>
+                <div class="form-group"><label>Pizza M:</label><input type="number" id="precoM"></div>
+                <div class="form-group"><label>Pizza G:</label><input type="number" id="precoG"></div>
+                <div class="form-group"><label>Pizza F:</label><input type="number" id="precoF"></div>
+            </div>
+
+            <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR ALTERAÇÕES</button>
+        </form>
+    </div>
+
+    <script>
+        /* ============================================================
+           CONTROLE DE ACESSO (SEGURANÇA)
+           ============================================================ */
+        if (localStorage.getItem('admin_logado') !== 'true') {
+            window.location.href = "login.html";
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_logado');
+            window.location.href = "login.html";
+        }
+
+        /* ============================================================
+           INTEGRAÇÃO COM A API (ALTERADO PARA RENDER)
+           ============================================================ */
+        const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
+
+        // Carrega os dados atuais quando abre a página
+        async function carregarDados() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                
+                document.getElementById('statusLoja').value = data.statusLoja;
+                document.getElementById('whatsapp').value = data.whatsapp;
+                document.getElementById('taxaEntrega').value = data.taxaEntrega;
+                document.getElementById('precoP').value = data.precos.P;
+                document.getElementById('precoM').value = data.precos.M;
+                document.getElementById('precoG').value = data.precos.G;
+                document.getElementById('precoF').value = data.precos.F;
+
+                const badge = document.getElementById('status-atual');
+                badge.innerText = `LOJA ATUALMENTE: ${data.statusLoja.toUpperCase()}`;
+                badge.className = `status-badge ${data.statusLoja}`;
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            }
+        }
+
+        async function salvarConfiguracoes() {
+            const config = {
+                statusLoja: document.getElementById('statusLoja').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                taxaEntrega: parseFloat(document.getElementById('taxaEntrega').value),
+                precos: {
+                    P: parseFloat(document.getElementById('precoP').value),
+                    M: parseFloat(document.getElementById('precoM').value),
+                    G: parseFloat(document.getElementById('precoG').value),
+                    F: parseFloat(document.getElementById('precoF').value)
+                }
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/atualizar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                if(res.ok) {
+                    alert("Dados atualizados com sucesso!");
+                    carregarDados();
+                }
+            } catch (error) {
+                alert("Erro ao salvar configurações!");
+            }
+        }
+
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>

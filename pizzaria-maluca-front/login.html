@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Administrativo</title>
+    <style>
+        .login-box { max-width: 350px; margin: 80px auto; padding: 30px; background: #1e1e1e; border-radius: 10px; text-align: center; color: white; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; box-sizing: border-box; background: #2a2a2a; color: white; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        button:hover { background: #c0392b; }
+        .link-recuperar { display: block; margin-top: 15px; color: #bbb; font-size: 13px; text-decoration: none; cursor: pointer; }
+        .hidden { display: none; }
+        .instrucao { font-size: 12px; color: #aaa; margin-bottom: 10px; }
+    </style>
+</head>
+<body style="background: #121212;">
+    <div class="login-box">
+        <img src="img/pizzas/LOGO PIZZA.png" width="80">
+        <div id="tela-login">
+            <h2>Painel Admin</h2>
+            <input type="password" id="senha" placeholder="Senha de 6 números" maxlength="6">
+            <button onclick="verificarSenha()">ENTRAR</button>
+            <span class="link-recuperar" onclick="mostrarRecuperacao()">Esqueci a senha</span>
+        </div>
+        <div id="tela-recuperar" class="hidden">
+            <h2>Recuperação</h2>
+            <p class="instrucao">Enviaremos um código de segurança para o WhatsApp da pizzaria.</p>
+            <button style="background: #25d366;" onclick="enviarCodigoZap()">RECEBER CÓDIGO NO WHATSAPP</button>
+            <div id="area-validacao" class="hidden">
+                <input type="text" id="codigo-input" placeholder="Digite o código de 6 dígitos" maxlength="6">
+                <button onclick="validarCodigo()">VALIDAR CÓDIGO</button>
+            </div>
+            <span class="link-recuperar" onclick="voltarLogin()">Voltar ao login</span>
+        </div>
+        <div id="tela-nova-senha" class="hidden">
+            <h2>Nova Senha</h2>
+            <p class="instrucao">Crie sua nova senha de 6 números:</p>
+            <input type="password" id="nova-senha" placeholder="Nova senha (6 números)" maxlength="6">
+            <input type="password" id="confirma-senha" placeholder="Confirme a nova senha" maxlength="6">
+            <button style="background: #2ecc71;" onclick="salvarNovaSenha()">DEFINIR NOVA SENHA</button>
+        </div>
+    </div>
+    <script>
+        const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
+        let codigoSegurancaGerado = null;
+        function mostrarRecuperacao() {
+            document.getElementById('tela-login').classList.add('hidden');
+            document.getElementById('tela-recuperar').classList.remove('hidden');
+        }
+        function voltarLogin() { location.reload(); }
+        async function verificarSenha() {
+            const senhaDigitada = document.getElementById('senha').value;
+            const res = await fetch(API_URL);
+            const config = await res.json();
+            if(senhaDigitada === config.senhaMestre) {
+                localStorage.setItem('admin_logado', 'true');
+                window.location.href = "admin.html";
+            } else { alert("Senha incorreta!"); }
+        }
+        async function enviarCodigoZap() {
+            const res = await fetch(API_URL);
+            const config = await res.json();
+            codigoSegurancaGerado = Math.floor(100000 + Math.random() * 900000);
+            const msg = `🔐 *PIZZARIA MALUCA*\n\nSeu código para redefinir a senha é: *${codigoSegurancaGerado}*`;
+            window.open(`https://api.whatsapp.com/send?phone=${config.whatsapp}&text=${encodeURIComponent(msg)}`);
+            document.getElementById('area-validacao').classList.remove('hidden');
+        }
+        function validarCodigo() {
+            const input = document.getElementById('codigo-input').value;
+            if(input == codigoSegurancaGerado) {
+                document.getElementById('tela-recuperar').classList.add('hidden');
+                document.getElementById('tela-nova-senha').classList.remove('hidden');
+            } else { alert("Código inválido!"); }
+        }
+        async function salvarNovaSenha() {
+            const nova = document.getElementById('nova-senha').value;
+            const confirma = document.getElementById('confirma-senha').value;
+            if(nova.length !== 6 || isNaN(nova)) return alert("A senha deve ter 6 números!");
+            if(nova !== confirma) return alert("As senhas não coincidem!");
+            const res = await fetch(`${API_URL}/atualizar-senha`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ novaSenha: nova })
+            });
+            if(res.ok) {
+                alert("Senha atualizada com sucesso! Faça login agora.");
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

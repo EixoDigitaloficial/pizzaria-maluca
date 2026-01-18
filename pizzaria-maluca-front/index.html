@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!-- Declara que o documento utiliza HTML5 -->
+
+<html lang="pt-br">
+<!-- Início do documento HTML, definindo o idioma como português do Brasil -->
+
+<head>
+    <!-- Cabeçalho do documento (configurações e imports) -->
+
+    <meta charset="UTF-8">
+    <!-- Define o conjunto de caracteres como UTF-8 (acentuação correta) -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ajusta o layout para dispositivos móveis (responsividade) -->
+
+    <title>Pizzaria Maluca - Cardápio Digital</title>
+    <!-- Título exibido na aba do navegador -->
+
+    <link rel="stylesheet" href="style.css">
+    <!-- Importa o arquivo CSS principal do projeto -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Importa a biblioteca Font Awesome para uso de ícones -->
+</head>
+
+<body>
+<!-- Corpo do site, tudo que aparece na tela -->
+
+    <header class="main-header">
+        <!-- Cabeçalho principal do site -->
+
+        <div class="logo-container">
+            <!-- Container da logo -->
+
+            <img src="img/pizzas/LOGO PIZZA.png" alt="Logo Pizzaria" class="main-logo">
+            <!-- Logo da pizzaria -->
+        </div>
+
+        <div class="status-bar">
+            <!-- Barra de status da loja -->
+
+            <div id="status-loja" class="status-indicator">
+                <span class="dot"></span> Aberto
+                <!-- Indicador visual de status (aberto/fechado) -->
+            </div>
+        </div>
+    </header>
+
+    <main id="page-menu" class="container main-layout">
+        <!-- Área principal do cardápio -->
+
+        <section class="menu-section">
+            <!-- Seção dos produtos -->
+
+            <div class="banner-promocional">
+                <!-- Banner explicativo dos tamanhos -->
+
+                <i class="fas fa-pizza-slice"></i>
+                <!-- Ícone de pizza -->
+
+                <span>
+                    <b>P</b>: 1 sabor | <b>M</b>: 2 sabores | <b>G/F</b>: 3 sabores
+                </span>
+                <!-- Texto explicativo dos tamanhos -->
+            </div>
+
+            <h2 class="category-title">Pizzas Tradicionais</h2>
+            <!-- Título da categoria -->
+
+            <div class="product-grid" id="lista-tradicionais"></div>
+            <!-- Lista dinâmica das pizzas tradicionais -->
+
+            <h2 class="category-title">Pizzas Gourmet & Especiais</h2>
+            <!-- Título da categoria -->
+
+            <div class="product-grid" id="lista-gourmet"></div>
+            <!-- Lista dinâmica das pizzas gourmet -->
+
+            <h2 class="category-title">Pizzas Doces</h2>
+            <!-- Título da categoria -->
+
+            <div class="product-grid" id="lista-doces"></div>
+            <!-- Lista dinâmica das pizzas doces -->
+
+            <h2 class="category-title">BEBIDAS</h2>
+            <!-- Título da categoria -->
+
+            <div class="product-grid" id="lista-bebidas"></div>
+            <!-- Lista dinâmica das bebidas -->
+        </section>
+
+        <aside class="sidebar-cart">
+            <!-- Barra lateral do carrinho -->
+
+            <h3 class="cart-title">
+                <i class="fas fa-shopping-cart"></i> Meu Pedido
+            </h3>
+            <!-- Título do carrinho -->
+
+            <div id="carrinho-itens" class="cart-scroll-area">
+                <!-- Área onde os itens do carrinho são exibidos -->
+
+                <p class="empty-msg">Escolha seus sabores favoritos!</p>
+                <!-- Mensagem exibida quando o carrinho está vazio -->
+            </div>
+
+            <div class="cart-totals">
+                <!-- Área de totais do carrinho -->
+
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">R$ 0,00</span>
+                </div>
+                <!-- Linha do subtotal -->
+
+                <div class="total-row">
+                    <span>Entrega</span>
+                    <span>R$ 5,00</span>
+                </div>
+                <!-- Linha do valor da entrega -->
+
+                <div class="total-row final-total">
+                    <span>Total</span>
+                    <span id="total-geral">R$ 0,00</span>
+                </div>
+                <!-- Linha do total geral -->
+
+                <button onclick="mudarPagina('checkout')" class="btn-checkout-next">
+                    FINALIZAR PEDIDO <i class="fas fa-arrow-right"></i>
+                </button>
+                <!-- Botão para ir para a página de checkout -->
+
+                <button onclick="limparCarrinho()" class="btn-clear-cart">
+                    EXCLUIR PEDIDO
+                </button>
+                <!-- Botão para limpar o carrinho -->
+            </div>
+        </aside>
+    </main>
+
+    <main id="page-checkout" class="container hidden">
+        <!-- Página de checkout (inicialmente oculta) -->
+
+        <div class="checkout-card">
+            <!-- Card do formulário de entrega -->
+
+            <button class="back-link" onclick="mudarPagina('menu')">
+                <i class="fas fa-chevron-left"></i> Voltar
+            </button>
+            <!-- Botão para voltar ao cardápio -->
+
+            <h2 class="checkout-title">Dados para Entrega</h2>
+            <!-- Título do formulário -->
+
+            <div class="form-field">
+                <!-- Campo do nome -->
+                <label>Nome Completo</label>
+                <input type="text" id="nome_cliente" placeholder="Seu nome">
+            </div>
+
+            <div class="form-field">
+                <!-- Campo do endereço -->
+                <label>Endereço</label>
+                <input type="text" id="endereco_cliente" placeholder="Rua, número, bairro">
+            </div>
+
+            <div class="form-field">
+                <!-- Campo de pagamento -->
+                <label>Pagamento</label>
+                <select id="pagamento_cliente">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão">Cartão</option>
+                    <option value="PIX">PIX</option>
+                </select>
+            </div>
+
+            <button onclick="enviarPedidoWhatsApp()" class="btn-send-whatsapp">
+                ENVIAR WHATSAPP
+            </button>
+            <!-- Botão para enviar o pedido via WhatsApp -->
+        </div>
+    </main>
+
+    <div id="modal-selecao" class="modal hidden">
+        <!-- Modal de seleção de sabores -->
+
+        <div class="modal-box">
+            <!-- Caixa do modal -->
+
+            <h3 id="modal-title">Escolha</h3>
+            <!-- Título do modal -->
+
+            <p id="modal-subtitle"></p>
+            <!-- Subtítulo do modal -->
+
+            <div id="modal-options" class="sabor-grid"></div>
+            <!-- Opções de sabores -->
+
+            <button onclick="confirmarSelecao()" class="btn-add-modal">
+                ADICIONAR
+            </button>
+            <!-- Confirma seleção -->
+
+            <button onclick="fecharModal()" class="btn-cancel-modal">
+                CANCELAR
+            </button>
+            <!-- Fecha o modal -->
+        </div>
+    </div>
+
+    <div id="custom-alert" class="modal-alert hidden">
+        <!-- Modal de alerta personalizado -->
+
+        <div class="alert-box">
+            <!-- Caixa do alerta -->
+
+            <h3 id="alert-message"></h3>
+            <!-- Mensagem do alerta -->
+
+            <button onclick="fecharAlertaCustom()">OK</button>
+            <!-- Fecha o alerta -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <!-- Importa o arquivo JavaScript principal -->
+
+     <!-- STATUS DA LOJA -->
+    <div class="status-bar">
+        <div id="status-loja" class="status-indicator aberto">
+            <span class="dot"></span> Aberto
+        </div>
+    </div>
+
+</header>
+
+<script src="script.js"></script>
+
+<!-- DEFINE O STATUS INICIAL DA LOJA -->
+<script>
+    // true = ABERTO | false = FECHADO
+    definirStatusLoja(true);
+</script>
+
+</body>
+</html>

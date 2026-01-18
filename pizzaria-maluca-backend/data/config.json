@@ -1,0 +1,12 @@
+{
+  "statusLoja": "aberto",
+  "whatsapp": "5599984207838",
+  "taxaEntrega": 5,
+  "precos": {
+    "P": 35,
+    "M": 45,
+    "G": 55,
+    "F": 70
+  },
+  "senhaMestre": "123456"
+}
