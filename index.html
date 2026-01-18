@@ -8,31 +8,87 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+
     <header class="main-header">
         <div class="logo-container">
-            <img src="img/pizzas/LOGO PIZZA.png" alt="Logo" class="main-logo">
+            <img src="img/pizzas/LOGO PIZZA.png" alt="Logo Pizzaria" class="main-logo">
         </div>
         <div class="status-bar">
-            <div id="status-loja" class="status-indicator">Carregando status...</div>
+            <div id="status-loja" class="status-indicator">
+                <span class="dot"></span> Carregando...
+            </div>
         </div>
     </header>
 
-    <main class="container main-layout">
-        <div class="banner-promocional">
-            <i class="fas fa-pizza-slice"></i>
-            <span>
-                <b>P</b>: R$ <span id="v-preco-p">0,00</span> | 
-                <b>M</b>: R$ <span id="v-preco-m">0,00</span> | 
-                <b>G/F</b>: R$ <span id="v-preco-g">0,00</span>
-            </span>
-        </div>
+    <main id="page-menu" class="container main-layout">
+        <section class="menu-section">
+            <div class="banner-promocional">
+                <i class="fas fa-pizza-slice"></i>
+                <span>
+                    <b>P</b>: R$ <span id="v-preco-p">0,00</span> | 
+                    <b>M</b>: R$ <span id="v-preco-m">0,00</span> | 
+                    <b>G/F</b>: R$ <span id="v-preco-g">0,00</span>
+                </span>
+            </div>
 
-        <h2 class="category-title" onclick="toggleCategoria('tradicionais')">Pizzas Tradicionais</h2>
-        <div class="product-grid" id="lista-tradicionais"></div>
+            <h2 class="category-title">Pizzas Tradicionais</h2>
+            <div class="product-grid" id="lista-tradicionais"></div>
 
-        <h2 class="category-title" onclick="toggleCategoria('doces')">Pizzas Doces</h2>
-        <div class="product-grid" id="lista-doces"></div>
+            <h2 class="category-title">Pizzas Gourmet & Especiais</h2>
+            <div class="product-grid" id="lista-gourmet"></div>
+
+            <h2 class="category-title">Pizzas Doces</h2>
+            <div class="product-grid" id="lista-doces"></div>
+
+            <h2 class="category-title">BEBIDAS</h2>
+            <div class="product-grid" id="lista-bebidas"></div>
+        </section>
+
+        <aside class="sidebar-cart">
+            <h3 class="cart-title"><i class="fas fa-shopping-cart"></i> Meu Pedido</h3>
+            <div id="carrinho-itens" class="cart-scroll-area">
+                <p class="empty-msg">Escolha seus sabores favoritos!</p>
+            </div>
+            <div class="cart-totals">
+                <div class="total-row"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+                <div class="total-row"><span>Entrega</span><span id="v-taxa-entrega">R$ 0,00</span></div>
+                <div class="total-row final-total"><span>Total</span><span id="total-geral">R$ 0,00</span></div>
+                <button onclick="mudarPagina('checkout')" class="btn-checkout-next">FINALIZAR PEDIDO <i class="fas fa-arrow-right"></i></button>
+                <button onclick="limparCarrinho()" class="btn-clear-cart">EXCLUIR PEDIDO</button>
+            </div>
+        </aside>
     </main>
+
+    <main id="page-checkout" class="container hidden">
+        <div class="checkout-card">
+            <button class="back-link" onclick="mudarPagina('menu')"><i class="fas fa-chevron-left"></i> Voltar</button>
+            <h2 class="checkout-title">Dados para Entrega</h2>
+            <div class="form-field"><label>Nome Completo</label><input type="text" id="nome_cliente" placeholder="Seu nome"></div>
+            <div class="form-field"><label>Endereço</label><input type="text" id="endereco_cliente" placeholder="Rua, número, bairro"></div>
+            <div class="form-field"><label>Pagamento</label>
+                <select id="pagamento_cliente">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão">Cartão</option>
+                    <option value="PIX">PIX</option>
+                </select>
+            </div>
+            <button onclick="enviarPedidoWhatsApp()" class="btn-send-whatsapp">ENVIAR WHATSAPP</button>
+        </div>
+    </main>
+
+    <div id="modal-selecao" class="modal hidden">
+        <div class="modal-box">
+            <h3 id="modal-title">Escolha</h3>
+            <p id="modal-subtitle"></p>
+            <div id="modal-options" class="sabor-grid"></div>
+            <button onclick="confirmarSelecao()" class="btn-add-modal">ADICIONAR</button>
+            <button onclick="fecharModal()" class="btn-cancel-modal">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="custom-alert" class="modal-alert hidden">
+        <div class="alert-box"><h3 id="alert-message"></h3><button onclick="fecharAlertaCustom()">OK</button></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
