@@ -5,92 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Pizzaria Maluca</title>
     <style>
-        /* Base de estilo para qualquer dispositivo */
         body { background: #121212; font-family: sans-serif; margin: 0; padding: 0; }
-        
-        .admin-container { 
-            padding: 15px; 
-            max-width: 600px; 
-            margin: auto; 
-            color: white; 
-            box-sizing: border-box;
-        }
-
+        .admin-container { padding: 15px; max-width: 600px; margin: auto; color: white; box-sizing: border-box; }
         header { text-align: center; margin-bottom: 20px; position: relative; }
-        
-        .btn-logout { 
-            background: #e74c3c; 
-            color: white; 
-            border: none; 
-            padding: 8px 15px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 14px;
-        }
-
-        .status-badge { 
-            padding: 15px; 
-            text-align: center; 
-            border-radius: 5px; 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
+        .btn-logout { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; position: absolute; right: 0; top: 0; font-size: 14px; }
+        .status-badge { padding: 15px; text-align: center; border-radius: 5px; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; font-size: 14px; }
         .aberto { background: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
         .fechado { background: #e74c3c; box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
-
         .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
-        
         label { font-size: 14px; margin-bottom: 5px; color: #aaa; }
-
-        input, select { 
-            padding: 12px; 
-            border-radius: 5px; 
-            border: 1px solid #333; 
-            background: #2a2a2a; 
-            color: white; 
-            font-size: 16px; 
-        }
-
-        .grid-precos {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .btn-salvar { 
-            background: #2ecc71; 
-            color: white; 
-            padding: 18px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-weight: bold; 
-            margin-top: 20px; 
-            font-size: 16px;
-            transition: 0.2s;
-        }
-
-        .btn-salvar:active { transform: scale(0.98); }
-
-        h3 { 
-            margin-top: 25px; 
-            border-bottom: 1px solid #333; 
-            padding-bottom: 5px; 
-            font-size: 18px;
-            color: #e74c3c;
-        }
-
-        @media (max-width: 400px) {
-            .grid-precos { grid-template-columns: 1fr; }
-            .btn-logout { position: static; width: 100%; margin-bottom: 15px; }
-        }
+        input, select { padding: 12px; border-radius: 5px; border: 1px solid #333; background: #2a2a2a; color: white; font-size: 16px; }
+        .grid-precos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .btn-salvar { background: #2ecc71; color: white; padding: 18px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; font-size: 16px; transition: 0.2s; }
+        h3 { margin-top: 25px; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 18px; color: #e74c3c; }
+        @media (max-width: 400px) { .grid-precos { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -132,11 +60,12 @@
 
             <h3>Preços das Bebidas (R$)</h3>
             <div class="grid-precos">
-                <div class="form-group"><label>Água:</label><input type="number" step="0.01" id="precoAgua"></div>
-                <div class="form-group"><label>Refri 1Lt:</label><input type="number" step="0.01" id="precoRefri1l"></div>
-                <div class="form-group"><label>Refri 2Lt:</label><input type="number" step="0.01" id="precoRefri2l"></div>
-                <div class="form-group"><label>Suco Leite:</label><input type="number" step="0.01" id="precoSucoLeite"></div>
-                <div class="form-group"><label>Suco Água:</label><input type="number" step="0.01" id="precoSucoAgua"></div>
+                <div class="form-group"><label>Água sem Gás:</label><input type="number" step="0.01" id="aguasemGas"></div>
+                <div class="form-group"><label>Água com Gás:</label><input type="number" step="0.01" id="AguacomGas"></div>
+                <div class="form-group"><label>Refri 1Lt:</label><input type="number" step="0.01" id="refri1l"></div>
+                <div class="form-group"><label>Refri 2Lt:</label><input type="number" step="0.01" id="refri2l"></div>
+                <div class="form-group"><label>Suco sem Leite:</label><input type="number" step="0.01" id="sucosemLeite"></div>
+                <div class="form-group"><label>Suco com Leite:</label><input type="number" step="0.01" id="sucocomLeite"></div>
             </div>
 
             <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR ALTERAÇÕES</button>
@@ -144,17 +73,9 @@
     </div>
 
     <script>
-        /* SEGURANÇA */
-        if (localStorage.getItem('admin_logado') !== 'true') {
-            window.location.href = "login.html";
-        }
+        if (localStorage.getItem('admin_logado') !== 'true') { window.location.href = "login.html"; }
+        function logout() { localStorage.removeItem('admin_logado'); window.location.href = "login.html"; }
 
-        function logout() {
-            localStorage.removeItem('admin_logado');
-            window.location.href = "login.html";
-        }
-
-        /* CONEXÃO API */
         const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
 
         async function carregarDados() {
@@ -166,27 +87,24 @@
                 document.getElementById('whatsapp').value = data.whatsapp;
                 document.getElementById('taxaEntrega').value = data.taxaEntrega;
                 
-                // Preenche Pizzas
                 document.getElementById('precoP').value = data.precos.P;
                 document.getElementById('precoM').value = data.precos.M;
                 document.getElementById('precoG').value = data.precos.G;
                 document.getElementById('precoF').value = data.precos.F;
 
-                // Preenche Bebidas
                 if(data.bebidas) {
-                    document.getElementById('precoAgua').value = data.bebidas.agua;
-                    document.getElementById('precoRefri1l').value = data.bebidas.refri1l;
-                    document.getElementById('precoRefri2l').value = data.bebidas.refri2l;
-                    document.getElementById('precoSucoLeite').value = data.bebidas.sucoLeite;
-                    document.getElementById('precoSucoAgua').value = data.bebidas.sucoAgua;
+                    document.getElementById('aguasemGas').value = data.bebidas.aguasemGas;
+                    document.getElementById('AguacomGas').value = data.bebidas.AguacomGas;
+                    document.getElementById('refri1l').value = data.bebidas.refri1l;
+                    document.getElementById('refri2l').value = data.bebidas.refri2l;
+                    document.getElementById('sucosemLeite').value = data.bebidas.sucosemLeite;
+                    document.getElementById('sucocomLeite').value = data.bebidas.sucocomLeite;
                 }
 
                 const badge = document.getElementById('status-atual');
                 badge.innerText = `Loja está: ${data.statusLoja}`;
                 badge.className = `status-badge ${data.statusLoja}`;
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error);
-            }
+            } catch (error) { console.error("Erro ao carregar:", error); }
         }
 
         async function salvarConfiguracoes() {
@@ -205,11 +123,12 @@
                     F: parseFloat(document.getElementById('precoF').value)
                 },
                 bebidas: {
-                    agua: parseFloat(document.getElementById('precoAgua').value),
-                    refri1l: parseFloat(document.getElementById('precoRefri1l').value),
-                    refri2l: parseFloat(document.getElementById('precoRefri2l').value),
-                    sucoLeite: parseFloat(document.getElementById('precoSucoLeite').value),
-                    sucoAgua: parseFloat(document.getElementById('precoSucoAgua').value)
+                    aguasemGas: parseFloat(document.getElementById('aguasemGas').value),
+                    AguacomGas: parseFloat(document.getElementById('AguacomGas').value),
+                    refri1l: parseFloat(document.getElementById('refri1l').value),
+                    refri2l: parseFloat(document.getElementById('refri2l').value),
+                    sucosemLeite: parseFloat(document.getElementById('sucosemLeite').value),
+                    sucocomLeite: parseFloat(document.getElementById('sucocomLeite').value)
                 }
             };
 
@@ -219,19 +138,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
-
-                if(res.ok) {
-                    alert("Dados salvos com sucesso!");
-                    carregarDados();
-                }
-            } catch (error) {
-                alert("Erro ao salvar! Tente novamente.");
-            } finally {
-                btn.innerText = "SALVAR ALTERAÇÕES";
-                btn.disabled = false;
-            }
+                if(res.ok) { alert("Dados salvos!"); carregarDados(); }
+            } catch (error) { alert("Erro ao salvar!"); }
+            finally { btn.innerText = "SALVAR ALTERAÇÕES"; btn.disabled = false; }
         }
-
         window.onload = carregarDados;
     </script>
 </body>
