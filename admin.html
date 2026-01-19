@@ -90,6 +90,7 @@
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 
+                // Armazena a senha atual para o caso do campo ficar vazio
                 senhaAtualServidor = data.senhaMestre;
 
                 document.getElementById('statusLoja').value = data.statusLoja;
@@ -141,6 +142,7 @@
                     sucosemLeite: parseFloat(document.getElementById('sucosemLeite').value),
                     sucocomLeite: parseFloat(document.getElementById('sucocomLeite').value)
                 },
+                // Atualiza a senha se o campo for preenchido
                 senhaMestre: novaSenhaCampo.trim() !== "" ? novaSenhaCampo : senhaAtualServidor
             };
 
