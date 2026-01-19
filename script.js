@@ -71,10 +71,29 @@ function renderCategoria(id, lista) {
 function renderBebidas() {
     const box = document.getElementById('lista-bebidas');
     if(!box) return;
+    
+    // Inserção do HTML das bebidas
     box.innerHTML = `
-        <div class="item-card"><img src="img/bebidas/agua 01.png" width="80"><h3>Água</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Agua')">ESCOLHER</button></div>
-        <div class="item-card"><img src="img/bebidas/Refrigerantes 01.png" width="80"><h3>Refrigerantes</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Refri')">ESCOLHER</button></div>
-        <div class="item-card"><img src="img/bebidas/sucos 01.png" width="80"><h3>Sucos Naturais</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Suco')">ESCOLHER</button></div>`;
+        <div class="item-card">
+            <img src="img/bebidas/agua 01.png" width="80">
+            <h3>Água</h3>
+            <button class="btn-checkout-next" id="btn-agua">ESCOLHER</button>
+        </div>
+        <div class="item-card">
+            <img src="img/bebidas/Refrigerantes 01.png" width="80">
+            <h3>Refrigerantes</h3>
+            <button class="btn-checkout-next" id="btn-refri">ESCOLHER</button>
+        </div>
+        <div class="item-card">
+            <img src="img/bebidas/sucos 01.png" width="80">
+            <h3>Sucos Naturais</h3>
+            <button class="btn-checkout-next" id="btn-suco">ESCOLHER</button>
+        </div>`;
+
+    // Atribuição dos eventos de clique
+    document.getElementById('btn-agua').onclick = () => abrirModalBebida('Agua');
+    document.getElementById('btn-refri').onclick = () => abrirModalBebida('Refri');
+    document.getElementById('btn-suco').onclick = () => abrirModalBebida('Suco');
 }
 
 // --- 2. MODAIS E SELEÇÃO ---
@@ -167,7 +186,6 @@ function atualizarCarrinho() {
     document.getElementById('total-geral').innerText = `R$ ${(sub + entrega).toFixed(2)}`;
 }
 
-// Funções Utilitárias
 function fecharModal() { document.getElementById('modal-selecao').classList.add('hidden'); }
 function limparCarrinho() { carrinho = []; atualizarCarrinho(); }
 function mudarPagina(p) { 
