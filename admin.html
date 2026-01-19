@@ -68,6 +68,12 @@
                 <div class="form-group"><label>Suco com Leite:</label><input type="number" step="0.01" id="sucocomLeite"></div>
             </div>
 
+            <h3>Segurança do Painel</h3>
+            <div class="form-group">
+                <label>Nova Senha de Acesso:</label>
+                <input type="password" id="novaSenha" placeholder="Digite para mudar ou deixe vazio">
+            </div>
+
             <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR ALTERAÇÕES</button>
         </form>
     </div>
@@ -77,12 +83,15 @@
         function logout() { localStorage.removeItem('admin_logado'); window.location.href = "login.html"; }
 
         const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
+        let senhaAtualServidor = "";
 
         async function carregarDados() {
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 
+                senhaAtualServidor = data.senhaMestre;
+
                 document.getElementById('statusLoja').value = data.statusLoja;
                 document.getElementById('whatsapp').value = data.whatsapp;
                 document.getElementById('taxaEntrega').value = data.taxaEntrega;
@@ -109,6 +118,8 @@
 
         async function salvarConfiguracoes() {
             const btn = document.querySelector('.btn-salvar');
+            const novaSenhaCampo = document.getElementById('novaSenha').value;
+            
             btn.innerText = "SALVANDO...";
             btn.disabled = true;
 
@@ -129,7 +140,8 @@
                     refri2l: parseFloat(document.getElementById('refri2l').value),
                     sucosemLeite: parseFloat(document.getElementById('sucosemLeite').value),
                     sucocomLeite: parseFloat(document.getElementById('sucocomLeite').value)
-                }
+                },
+                senhaMestre: novaSenhaCampo.trim() !== "" ? novaSenhaCampo : senhaAtualServidor
             };
 
             try {
@@ -138,7 +150,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
-                if(res.ok) { alert("Dados salvos!"); carregarDados(); }
+                if(res.ok) { 
+                    alert("Dados salvos com sucesso!"); 
+                    document.getElementById('novaSenha').value = "";
+                    carregarDados(); 
+                }
             } catch (error) { alert("Erro ao salvar!"); }
             finally { btn.innerText = "SALVAR ALTERAÇÕES"; btn.disabled = false; }
         }

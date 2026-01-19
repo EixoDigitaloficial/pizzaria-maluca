@@ -72,7 +72,6 @@ function renderBebidas() {
     const box = document.getElementById('lista-bebidas');
     if(!box) return;
     
-    // Inserção do HTML das bebidas
     box.innerHTML = `
         <div class="item-card">
             <img src="img/bebidas/agua 01.png" width="80">
@@ -90,7 +89,6 @@ function renderBebidas() {
             <button class="btn-checkout-next" id="btn-suco">ESCOLHER</button>
         </div>`;
 
-    // Atribuição dos eventos de clique
     document.getElementById('btn-agua').onclick = () => abrirModalBebida('Agua');
     document.getElementById('btn-refri').onclick = () => abrirModalBebida('Refri');
     document.getElementById('btn-suco').onclick = () => abrirModalBebida('Suco');
