@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Administrativo - Pizzaria Maluca</title>
     <style>
-        /* Ajuste para ocupar a tela toda e centralizar em qualquer dispositivo */
         body, html {
             height: 100%;
             margin: 0;
@@ -15,7 +14,6 @@
             background: #121212;
             font-family: sans-serif;
         }
-
         .login-box { 
             width: 90%; 
             max-width: 350px; 
@@ -26,7 +24,6 @@
             color: white; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
         }
-
         input { 
             width: 100%; 
             padding: 12px; 
@@ -39,7 +36,6 @@
             text-align: center; 
             font-size: 16px; 
         }
-
         button { 
             width: 100%; 
             padding: 12px; 
@@ -52,9 +48,7 @@
             margin-top: 10px; 
             transition: 0.3s; 
         }
-
         button:hover { background: #c0392b; }
-
         .link-recuperar { 
             display: block; 
             margin-top: 15px; 
@@ -63,16 +57,13 @@
             text-decoration: none; 
             cursor: pointer; 
         }
-
         .hidden { display: none; }
-
         .instrucao { 
             font-size: 12px; 
             color: #aaa; 
             margin-bottom: 10px; 
             line-height: 1.4;
         }
-
         img { margin-bottom: 10px; }
     </style>
 </head>
@@ -109,7 +100,8 @@
     </div>
 
     <script>
-        const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
+        // URL base do seu servidor backend
+        const BASE_API = "https://pizzaria-maluca.onrender.com/api";
         let codigoSegurancaGerado = null;
 
         function mostrarRecuperacao() {
@@ -122,12 +114,16 @@
         async function verificarSenha() {
             const senhaDigitada = document.getElementById('senha').value;
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(`${BASE_API}/config`);
                 const config = await res.json();
-                if(senhaDigitada === config.senhaMestre) {
+                
+                // Ajustado para buscar 'senhaAdmin' conforme o MongoDB
+                if(senhaDigitada === config.senhaAdmin) {
                     localStorage.setItem('admin_logado', 'true');
                     window.location.href = "admin.html";
-                } else { alert("Senha incorreta!"); }
+                } else { 
+                    alert("Senha incorreta!"); 
+                }
             } catch (err) {
                 alert("Erro ao conectar com o servidor. Verifique se o backend está ativo.");
             }
@@ -135,7 +131,7 @@
 
         async function enviarCodigoZap() {
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(`${BASE_API}/config`);
                 const config = await res.json();
                 codigoSegurancaGerado = Math.floor(100000 + Math.random() * 900000);
                 const msg = `🔐 *PIZZARIA MALUCA*\n\nSeu código para redefinir a senha é: *${codigoSegurancaGerado}*`;
@@ -151,7 +147,9 @@
             if(input == codigoSegurancaGerado) {
                 document.getElementById('tela-recuperar').classList.add('hidden');
                 document.getElementById('tela-nova-senha').classList.remove('hidden');
-            } else { alert("Código inválido!"); }
+            } else { 
+                alert("Código inválido!"); 
+            }
         }
 
         async function salvarNovaSenha() {
@@ -162,17 +160,23 @@
             if(nova !== confirma) return alert("As senhas não coincidem!");
 
             try {
-                const res = await fetch(`${API_URL}/atualizar-senha`, {
+                // Link corrigido para a rota de redefinir-senha
+                const res = await fetch(`${BASE_API}/redefinir-senha`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ novaSenha: nova })
                 });
+
                 if(res.ok) {
                     alert("Senha atualizada com sucesso! Faça login agora.");
                     location.reload();
+                } else {
+                    const textoErro = await res.text();
+                    alert("Erro do servidor: " + textoErro);
                 }
             } catch (err) {
-                alert("Erro ao salvar nova senha.");
+                console.error(err);
+                alert("Erro ao salvar nova senha. Verifique sua conexão.");
             }
         }
     </script>
