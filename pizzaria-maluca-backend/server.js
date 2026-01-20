@@ -5,7 +5,13 @@ const path = require('path');
 const cors = require('cors'); 
 const app = express();
 
-app.use(cors());
+// Configuração de CORS permitindo seu domínio do Render
+app.use(cors({
+    origin: 'https://pizzaria-maluca-web.onrender.com',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -14,7 +20,6 @@ mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
         console.log("✅ Conectado ao MongoDB com sucesso!");
         
-        // VERIFICA SE O BANCO ESTÁ VAZIO E CRIA O PRIMEIRO REGISTRO PARA DESTRAVAR O LOGIN
         const configExistente = await Config.findOne();
         if (!configExistente) {
             console.log("🚀 Banco vazio detectado! Criando dados iniciais...");
@@ -71,7 +76,6 @@ app.post('/api/redefinir-senha', async (req, res) => {
             return res.status(400).send("A senha deve ter pelo menos 6 números.");
         }
         
-        // Atualiza a senha do administrador no banco de dados
         await Config.findOneAndUpdate({}, { senhaAdmin: novaSenha });
         
         console.log("✅ Senha admin atualizada via recuperação.");
