@@ -39,13 +39,10 @@
 
             <h2 class="category-title">Pizzas Tradicionais</h2>
             <div class="product-grid" id="lista-tradicionais"></div>
-
             <h2 class="category-title">Pizzas Gourmet & Especiais</h2>
             <div class="product-grid" id="lista-gourmet"></div>
-
             <h2 class="category-title">Pizzas Doces</h2>
             <div class="product-grid" id="lista-doces"></div>
-
             <h2 class="category-title">BEBIDAS GELADAS</h2>
             <div class="product-grid" id="lista-bebidas"></div>
         </section>
@@ -59,10 +56,7 @@
                 <div class="total-row"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
                 <div class="total-row"><span>Taxa de Entrega</span><span id="v-taxa-entrega">R$ 0,00</span></div>
                 <div class="total-row final-total"><span>Total</span><span id="total-geral">R$ 0,00</span></div>
-                
-                <button onclick="mudarPagina('checkout')" class="btn-checkout-next">
-                    FINALIZAR PEDIDO <i class="fas fa-arrow-right"></i>
-                </button>
+                <button onclick="mudarPagina('checkout')" class="btn-checkout-next">FINALIZAR PEDIDO <i class="fas fa-arrow-right"></i></button>
                 <button onclick="limparCarrinho()" class="btn-clear-cart">Limpar Tudo</button>
             </div>
         </aside>
@@ -70,72 +64,42 @@
 
     <main id="page-checkout" class="container hidden">
         <div class="checkout-card container">
-            <button class="btn-clear-cart" style="text-align:left;" onclick="mudarPagina('menu')">
-                <i class="fas fa-chevron-left"></i> Voltar ao Cardápio
-            </button>
+            <button class="btn-clear-cart" style="text-align:left;" onclick="mudarPagina('menu')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <h2 class="category-title">Finalizar Pedido</h2>
-
-            <div class="resumo-total-checkout">
-                <span>Total a Pagar:</span>
-                <b id="checkout-total-exibicao">R$ 0,00</b>
-            </div>
+            <div class="resumo-total-checkout"><span>Total:</span> <b id="checkout-total-exibicao">R$ 0,00</b></div>
             
-            <div class="form-field">
-                <label>Nome Completo</label>
-                <input type="text" id="nome_cliente" placeholder="Ex: João Silva">
-            </div>
-            
-            <label>Forma de Entrega</label>
+            <div class="form-field"><label>Nome Completo</label><input type="text" id="nome_cliente" placeholder="Ex: João Silva"></div>
+            <label>Entrega ou Retirada?</label>
             <div class="metodo-envio">
-                <button id="btn-entrega" class="active" onclick="setMetodo('entrega')">
-                    <i class="fas fa-motorcycle"></i> ENTREGA
-                </button>
-                <button id="btn-retirada" onclick="setMetodo('retirada')">
-                    <i class="fas fa-store"></i> RETIRADA
-                </button>
+                <button id="btn-entrega" class="active" onclick="setMetodo('entrega')">ENTREGA</button>
+                <button id="btn-retirada" onclick="setMetodo('retirada')">RETIRADA</button>
             </div>
 
             <div id="campos-endereco">
                 <div class="grid-endereco">
-                    <div class="form-field">
-                        <label>Rua / Logradouro</label>
-                        <input type="text" id="rua_cliente" placeholder="Nome da sua rua">
-                    </div>
-                    <div class="form-field">
-                        <label>Nº</label>
-                        <input type="text" id="num_cliente" placeholder="123">
-                    </div>
+                    <div class="form-field"><label>Rua</label><input type="text" id="rua_cliente"></div>
+                    <div class="form-field"><label>Nº</label><input type="text" id="num_cliente"></div>
                 </div>
-                <div class="form-field">
-                    <label>Bairro</label>
-                    <input type="text" id="bairro_cliente" placeholder="Seu bairro">
-                </div>
-                <div class="form-field">
-                    <label>Ponto de Referência</label>
-                    <input type="text" id="ref_cliente" placeholder="Ex: Próximo à padaria">
-                </div>
+                <div class="form-field"><label>Bairro</label><input type="text" id="bairro_cliente"></div>
+                <div class="form-field"><label>Ponto de Referência</label><input type="text" id="ref_cliente" placeholder="Próximo a quê?"></div>
             </div>
 
-            <div class="form-field">
-                <label>Forma de Pagamento</label>
+            <div class="form-field"><label>Pagamento</label>
                 <select id="pagamento_cliente">
-                    <option value="PIX">PIX (Mais Rápido)</option>
-                    <option value="Cartão">Cartão (Levamos a maquininha)</option>
+                    <option value="PIX">PIX</option>
+                    <option value="Cartão">Cartão</option>
                     <option value="Dinheiro">Dinheiro</option>
                 </select>
             </div>
-
-            <button onclick="enviarPedidoWhatsApp()" class="btn-send-whatsapp">
-                <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO PARA COZINHA
-            </button>
+            <button onclick="enviarPedidoWhatsApp()" class="btn-send-whatsapp">ENVIAR PEDIDO</button>
         </div>
     </main>
 
     <div id="modal-selecao" class="modal hidden">
         <div class="modal-box">
-            <h3 id="modal-title" style="color: var(--yellow);">Escolha as Opções</h3>
-            <div id="modal-options" class="product-grid" style="grid-template-columns: 1fr; max-height: 300px; overflow-y: auto;">
-            </div>
+            <h3 id="modal-title" style="color: var(--yellow);">Opções</h3>
+            <p id="modal-subtitle" style="font-size: 13px; color: var(--gray);"></p>
+            <div id="modal-options" class="product-grid" style="grid-template-columns: 1fr; max-height: 400px; overflow-y: auto;"></div>
             <div style="margin-top: 20px; display: flex; gap: 10px;">
                 <button onclick="confirmarSelecao()" class="btn-checkout-next">ADICIONAR</button>
                 <button onclick="fecharModal()" class="btn-clear-cart" style="color: white; background: #333; border-radius: 12px;">CANCELAR</button>
