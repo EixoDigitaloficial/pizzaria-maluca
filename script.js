@@ -1,9 +1,8 @@
-const API_BASE_URL = "https://pizzaria-maluca.onrender.com/api";
+const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
 let configGeral = {};
-let precosPizza = {}; 
 let carrinho = [];
-let itemAtual = null; 
-let metodoEnvio = 'entrega'; // Padrão inicial
+let itemAtual = null;
+let metodoEnvio = 'entrega';
 
 const limitesSabores = { "P": 1, "M": 2, "G": 3, "F": 3 };
 
@@ -21,43 +20,28 @@ const menuPizzas = {
     ]
 };
 
-// --- 1. SINCRONIZAÇÃO E RENDERIZAÇÃO ---
 async function sincronizarComServidor() {
     try {
-        const res = await fetch(`${API_BASE_URL}/config`);
+        const res = await fetch(API_URL);
         configGeral = await res.json();
-        precosPizza = configGeral.precos;
+        
+        // Atualiza Banner de Preços
+        document.getElementById('v-preco-p').innerText = configGeral.precosPizzas.p.toFixed(2);
+        document.getElementById('v-preco-m').innerText = configGeral.precosPizzas.m.toFixed(2);
+        document.getElementById('v-preco-g').innerText = configGeral.precosPizzas.g.toFixed(2);
+        document.getElementById('v-preco-f').innerText = configGeral.precosPizzas.f.toFixed(2);
+        
+        document.getElementById('banner-loading').classList.add('hidden');
+        document.getElementById('banner-precos').classList.remove('hidden');
 
-        if(document.getElementById('v-preco-p')) document.getElementById('v-preco-p').innerText = precosPizza.P.toFixed(2);
-        if(document.getElementById('v-preco-m')) document.getElementById('v-preco-m').innerText = precosPizza.M.toFixed(2);
-        if(document.getElementById('v-preco-g')) document.getElementById('v-preco-g').innerText = precosPizza.G.toFixed(2);
-
+        // Atualiza Status da Loja
         const statusDiv = document.getElementById('status-loja');
-        if (statusDiv) {
-            statusDiv.innerHTML = configGeral.statusLoja === 'aberto' ? '<span class="dot"></span> Aberto' : '<span class="dot"></span> Fechado';
-            statusDiv.className = `status-indicator ${configGeral.statusLoja}`;
-        }
+        statusDiv.innerHTML = `<span class="dot"></span> Loja Aberta`;
+        statusDiv.className = `status-indicator aberto`;
 
         renderizarMenu();
-        atualizarCarrinho(); 
-    } catch (e) { console.error("Erro ao conectar ao servidor."); }
-}
-
-function setMetodo(tipo) {
-    metodoEnvio = tipo;
-    
-    document.getElementById('btn-entrega').classList.toggle('active', tipo === 'entrega');
-    document.getElementById('btn-retirada').classList.toggle('active', tipo === 'retirada');
-    
-    const camposEnd = document.getElementById('campos-endereco');
-    camposEnd.classList.toggle('hidden', tipo === 'retirada');
-    
-    atualizarCarrinho(); 
-    
-    // Atualiza o total destacado no checkout se o usuário mudar a opção na tela final
-    const checkoutTotalExibicao = document.getElementById('checkout-total-exibicao');
-    if (checkoutTotalExibicao) {
-        checkoutTotalExibicao.innerText = document.getElementById('total-geral').innerText;
+    } catch (e) {
+        document.getElementById('status-loja').innerText = "Erro ao conectar banco";
     }
 }
 
@@ -70,12 +54,10 @@ function renderizarMenu() {
 
 function renderCategoria(id, lista) {
     const box = document.getElementById(id);
-    if(!box) return;
     box.innerHTML = lista.map(item => `
         <div class="item-card">
-            <div class="item-img-box"><img src="${item.img}" onerror="this.src='img/pizzas/LOGO PIZZA.png'"></div>
+            <img src="${item.img}" onerror="this.src='img/pizzas/LOGO PIZZA.png'">
             <h3>${item.nome}</h3>
-            <p style="font-size:12px; color:#888;">${item.desc || ''}</p>
             <div class="size-selector">
                 <button class="btn-size" onclick="abrirModalPizza('${item.nome}', 'P')">P</button>
                 <button class="btn-size" onclick="abrirModalPizza('${item.nome}', 'M')">M</button>
@@ -87,95 +69,22 @@ function renderCategoria(id, lista) {
 
 function renderBebidas() {
     const box = document.getElementById('lista-bebidas');
-    if(!box) return;
-    
     box.innerHTML = `
-        <div class="item-card">
-            <img src="img/bebidas/agua 01.png" width="80">
-            <h3>Água</h3>
-            <button class="btn-checkout-next" id="btn-agua">ESCOLHER</button>
-        </div>
-        <div class="item-card">
-            <img src="img/bebidas/Refrigerantes 01.png" width="80">
-            <h3>Refrigerantes</h3>
-            <button class="btn-checkout-next" id="btn-refri">ESCOLHER</button>
-        </div>
-        <div class="item-card">
-            <img src="img/bebidas/sucos 01.png" width="80">
-            <h3>Sucos Naturais</h3>
-            <button class="btn-checkout-next" id="btn-suco">ESCOLHER</button>
-        </div>`;
-
-    document.getElementById('btn-agua').onclick = () => abrirModalBebida('Agua');
-    document.getElementById('btn-refri').onclick = () => abrirModalBebida('Refri');
-    document.getElementById('btn-suco').onclick = () => abrirModalBebida('Suco');
+        <div class="item-card"><h3>Água</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Agua')">ESCOLHER</button></div>
+        <div class="item-card"><h3>Refrigerantes</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Refri')">ESCOLHER</button></div>
+        <div class="item-card"><h3>Sucos</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Suco')">ESCOLHER</button></div>`;
 }
 
 function abrirModalPizza(nome, tam) {
-    itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limitesSabores[tam], preco: precosPizza[tam] };
+    itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limitesSabores[tam], preco: configGeral.precosPizzas[tam.toLowerCase()] };
     document.getElementById('modal-title').innerText = `Pizza ${tam} - ${nome}`;
-    const container = document.getElementById('modal-options');
     const todos = [...menuPizzas.tradicionais, ...menuPizzas.gourmet, ...menuPizzas.doces];
-    container.innerHTML = todos.map(s => `<label><input type="checkbox" name="selecao" value="${s.nome}"> ${s.nome}</label>`).join('');
-    document.getElementById('modal-selecao').classList.remove('hidden');
-}
-
-function abrirModalBebida(tipo) {
-    const b = configGeral.bebidas;
-    const container = document.getElementById('modal-options');
-    container.innerHTML = "";
-    document.getElementById('modal-subtitle').innerText = "Selecione as opções abaixo:";
-
-    if (tipo === 'Agua') {
-        document.getElementById('modal-title').innerText = "Água Mineral";
-        itemAtual = { tipo: 'bebida', nome: 'Água' };
-        container.innerHTML = `
-            <label><input type="radio" name="selecao_unica" value="Sem Gás|${b.aguasemGas}"> Sem Gás - R$ ${b.aguasemGas.toFixed(2)}</label>
-            <label><input type="radio" name="selecao_unica" value="Com Gás|${b.AguacomGas}"> Com Gás - R$ ${b.AguacomGas.toFixed(2)}</label>`;
-    } 
-    else if (tipo === 'Suco') {
-        document.getElementById('modal-title').innerText = "Sucos Naturais";
-        itemAtual = { tipo: 'bebida', nome: 'Suco' };
-        container.innerHTML = `<b>Opção:</b><br>
-            <label><input type="radio" name="tipo_bebida" value="Com Leite|${b.sucocomLeite}"> Com Leite (R$ ${b.sucocomLeite.toFixed(2)})</label>
-            <label><input type="radio" name="tipo_bebida" value="Sem Leite|${b.sucosemLeite}"> Sem Leite (R$ ${b.sucosemLeite.toFixed(2)})</label><br>
-            <b>Sabor:</b><br>` + 
-            ["Abacaxi", "Laranja", "Morango", "Acerola", "Maracujá", "Limão"].map(s => `<label><input type="radio" name="sabor_bebida" value="${s}"> ${s}</label>`).join('');
-    }
-    else if (tipo === 'Refri') {
-        document.getElementById('modal-title').innerText = "Refrigerantes";
-        itemAtual = { tipo: 'bebida', nome: 'Refri' };
-        container.innerHTML = `<b>Tamanho:</b><br>
-            <label><input type="radio" name="tipo_bebida" value="1Lt|${b.refri1l}"> 1 Litro - R$ ${b.refri1l.toFixed(2)}</label>
-            <label><input type="radio" name="tipo_bebida" value="2Lt|${b.refri2l}"> 2 Litros - R$ ${b.refri2l.toFixed(2)}</label><br>
-            <b>Sabor:</b><br>` + 
-            ["Cola", "Guaraná", "Fanta", "Jesus"].map(s => `<label><input type="radio" name="sabor_bebida" value="${s}"> ${s}</label>`).join('');
-    }
+    document.getElementById('modal-options').innerHTML = todos.map(s => `<label><input type="checkbox" name="selecao" value="${s.nome}"> ${s.nome}</label>`).join('');
     document.getElementById('modal-selecao').classList.remove('hidden');
 }
 
 function confirmarSelecao() {
-    if (!itemAtual) return;
-
-    if (itemAtual.tipo === 'bebida') {
-        const tipoB = document.querySelector('input[name="tipo_bebida"]:checked');
-        const saborB = document.querySelector('input[name="sabor_bebida"]:checked');
-        const unica = document.querySelector('input[name="selecao_unica"]:checked');
-
-        let nomeFinal, precoFinal;
-
-        if (unica) {
-            const [n, p] = unica.value.split('|');
-            nomeFinal = `${itemAtual.nome} ${n}`;
-            precoFinal = parseFloat(p);
-        } else if (tipoB && saborB) {
-            const [t, p] = tipoB.value.split('|');
-            nomeFinal = `${itemAtual.nome} ${saborB.value} (${t})`;
-            precoFinal = parseFloat(p);
-        } else { return alert("Por favor, selecione as opções!"); }
-
-        carrinho.push({ nome: nomeFinal, preco: precoFinal });
-    } else {
+    if (itemAtual.tipo === 'pizza') {
         const sel = Array.from(document.querySelectorAll('input[name="selecao"]:checked')).map(i => i.value);
         if(sel.length === 0 || sel.length > itemAtual.limite) return alert(`Escolha de 1 a ${itemAtual.limite} sabores!`);
         carrinho.push({ nome: `Pizza ${itemAtual.tamanho} (${sel.join('/')})`, preco: itemAtual.preco });
@@ -185,71 +94,42 @@ function confirmarSelecao() {
 }
 
 function atualizarCarrinho() {
-    const itensDiv = document.getElementById('carrinho-itens');
     let sub = 0;
-    itensDiv.innerHTML = carrinho.map((i, index) => { 
+    document.getElementById('carrinho-itens').innerHTML = carrinho.map(i => { 
         sub += i.preco; 
         return `<div class="cart-item"><span>${i.nome}</span> <b>R$ ${i.preco.toFixed(2)}</b></div>`;
     }).join('');
     
-    if(carrinho.length === 0) itensDiv.innerHTML = '<p class="empty-msg">Escolha seus sabores favoritos!</p>';
-    
     document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
-    
-    const taxaReal = (metodoEnvio === 'entrega' && sub > 0) ? configGeral.taxaEntrega : 0;
-    document.getElementById('v-taxa-entrega').innerText = `R$ ${taxaReal.toFixed(2)}`;
-    document.getElementById('total-geral').innerText = `R$ ${(sub + taxaReal).toFixed(2)}`;
+    const taxa = (metodoEnvio === 'entrega' && sub > 0) ? configGeral.taxaEntrega : 0;
+    document.getElementById('v-taxa-entrega').innerText = `R$ ${taxa.toFixed(2)}`;
+    document.getElementById('total-geral').innerText = `R$ ${(sub + taxa).toFixed(2)}`;
+    document.getElementById('checkout-total-exibicao').innerText = `R$ ${(sub + taxa).toFixed(2)}`;
+}
+
+function setMetodo(tipo) {
+    metodoEnvio = tipo;
+    document.getElementById('btn-entrega').className = tipo === 'entrega' ? 'active' : '';
+    document.getElementById('btn-retirada').className = tipo === 'retirada' ? 'active' : '';
+    document.getElementById('campos-endereco').classList.toggle('hidden', tipo === 'retirada');
+    atualizarCarrinho();
+}
+
+function mudarPagina(p) { 
+    if(p === 'checkout' && carrinho.length === 0) return alert("Carrinho vazio!");
+    document.getElementById('page-menu').classList.toggle('hidden', p !== 'menu');
+    document.getElementById('page-checkout').classList.toggle('hidden', p !== 'checkout');
+}
+
+function enviarPedidoWhatsApp() {
+    const nome = document.getElementById('nome_cliente').value;
+    if(!nome) return alert("Informe seu nome!");
+    let msg = `*🍕 NOVO PEDIDO*\n*Cliente:* ${nome}\n*Método:* ${metodoEnvio.toUpperCase()}\n\n*ITENS:*\n`;
+    carrinho.forEach(i => msg += `- ${i.nome}\n`);
+    msg += `\n*TOTAL:* ${document.getElementById('total-geral').innerText}`;
+    window.open(`https://api.whatsapp.com/send?phone=${configGeral.whatsapp}&text=${encodeURIComponent(msg)}`);
 }
 
 function fecharModal() { document.getElementById('modal-selecao').classList.add('hidden'); }
 function limparCarrinho() { carrinho = []; atualizarCarrinho(); }
-
-function mudarPagina(p) { 
-    if(p === 'checkout' && carrinho.length === 0) return alert("Carrinho vazio!");
-    
-    // Sincroniza o total em destaque ao abrir o checkout
-    if(p === 'checkout') {
-        document.getElementById('checkout-total-exibicao').innerText = document.getElementById('total-geral').innerText;
-    }
-
-    document.getElementById('page-menu').classList.toggle('hidden', p !== 'menu');
-    document.getElementById('page-checkout').classList.toggle('hidden', p !== 'checkout');
-    window.scrollTo(0,0);
-}
-
-function enviarPedidoWhatsApp() {
-    const n = document.getElementById('nome_cliente').value;
-    const pag = document.getElementById('pagamento_cliente').value;
-    
-    if(!n) return alert("Por favor, informe seu nome!");
-
-    let enderecoFinal = "";
-    if(metodoEnvio === 'entrega') {
-        const rua = document.getElementById('rua_cliente').value;
-        const num = document.getElementById('num_cliente').value;
-        const bairro = document.getElementById('bairro_cliente').value;
-        const ref = document.getElementById('ref_cliente').value;
-        
-        if(!rua || !num || !bairro) return alert("Preencha o endereço completo para entrega!");
-        enderecoFinal = `${rua}, nº ${num} - ${bairro} (Ref: ${ref || 'Não informado'})`;
-    } else {
-        enderecoFinal = "RETIRADA NA LOJA";
-    }
-    
-    let msg = `*🍕 NOVO PEDIDO - PIZZARIA MALUCA*\n`;
-    msg += `*Cliente:* ${n}\n`;
-    msg += `*Método:* ${metodoEnvio.toUpperCase()}\n`;
-    msg += `*Endereço:* ${enderecoFinal}\n`;
-    msg += `*Pagamento:* ${pag}\n\n`;
-    msg += `*ITENS:*\n`;
-    
-    carrinho.forEach(i => msg += `- ${i.nome} (R$ ${i.preco.toFixed(2)})\n`);
-    
-    msg += `\n*Total Itens:* R$ ${document.getElementById('subtotal').innerText}`;
-    msg += `\n*Taxa Entrega:* ${document.getElementById('v-taxa-entrega').innerText}`;
-    msg += `\n*TOTAL FINAL:* ${document.getElementById('total-geral').innerText}`;
-    
-    window.open(`https://api.whatsapp.com/send?phone=${configGeral.whatsapp}&text=${encodeURIComponent(msg)}`);
-}
-
 window.onload = sincronizarComServidor;
