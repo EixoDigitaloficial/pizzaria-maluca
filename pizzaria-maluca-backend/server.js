@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const cors = require('cors'); // Adicionado para evitar bloqueios de conexão
+const cors = require('cors'); 
 const app = express();
 
 app.use(cors());
@@ -24,14 +24,14 @@ mongoose.connect(process.env.MONGO_URI)
                 taxaEntrega: 5.00,
                 precosPizzas: { p: 35, m: 45, g: 55, f: 70 },
                 precosBebidas: { agua: 5, aguaGas: 6, refri1l: 8, refri: 12, sucoSimples: 10, sucoLeite: 12 },
-                senhaAdmin: "123456" // Use esta senha para o seu primeiro acesso
+                senhaAdmin: "123456" 
             });
             console.log("✅ Configuração inicial criada com sucesso! Senha padrão: 123456");
         }
     })
     .catch(err => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
-// 📝 DEFINIÇÃO DOS DADOS ATUALIZADA
+// 📝 DEFINIÇÃO DOS DADOS (Esquema do Banco)
 const ConfigSchema = new mongoose.Schema({
     statusLoja: String,
     whatsapp: String,
@@ -42,7 +42,7 @@ const ConfigSchema = new mongoose.Schema({
 });
 const Config = mongoose.model('Config', ConfigSchema);
 
-// 🌐 ROTA PARA BUSCAR CONFIGURAÇÕES (O site chama isso ao carregar)
+// 🌐 ROTA PARA BUSCAR CONFIGURAÇÕES (Usada pelo site e Login)
 app.get('/api/config', async (req, res) => {
     try {
         const config = await Config.findOne();
@@ -62,6 +62,26 @@ app.post('/api/config', async (req, res) => {
     }
 });
 
+// 🔐 ROTA PARA DEFINIR NOVA SENHA (Recuperação via WhatsApp)
+app.post('/api/redefinir-senha', async (req, res) => {
+    try {
+        const { novaSenha } = req.body;
+        
+        if (!novaSenha || novaSenha.length < 6) {
+            return res.status(400).send("A senha deve ter pelo menos 6 números.");
+        }
+        
+        // Atualiza a senha do administrador no banco de dados
+        await Config.findOneAndUpdate({}, { senhaAdmin: novaSenha });
+        
+        console.log("✅ Senha admin atualizada via recuperação.");
+        res.send("Senha atualizada com sucesso!");
+    } catch (err) {
+        console.error("Erro ao atualizar senha:", err);
+        res.status(500).send("Erro interno ao salvar nova senha.");
+    }
+});
+
 // 🚀 INICIALIZAÇÃO DO SERVIDOR
-const PORT = process.env.PORT || 10000; // Render prefere porta 10000 ou automática
+const PORT = process.env.PORT || 10000; 
 app.listen(PORT, () => console.log(`🚀 Backend Pizzaria rodando na porta ${PORT}`));
