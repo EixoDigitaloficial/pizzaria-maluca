@@ -1,54 +1,67 @@
-require('dotenv').config(); // Carrega o link do .env
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const cors = require('cors'); // Adicionado para evitar bloqueios de conexão
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 🔗 CONEXÃO COM O MONGODB
+// 🔗 CONEXÃO COM O MONGODB COM AUTO-INICIALIZAÇÃO
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ Conectado ao MongoDB com sucesso!"))
+    .then(async () => {
+        console.log("✅ Conectado ao MongoDB com sucesso!");
+        
+        // VERIFICA SE O BANCO ESTÁ VAZIO E CRIA O PRIMEIRO REGISTRO PARA DESTRAVAR O LOGIN
+        const configExistente = await Config.findOne();
+        if (!configExistente) {
+            console.log("🚀 Banco vazio detectado! Criando dados iniciais...");
+            await Config.create({
+                statusLoja: 'aberto',
+                whatsapp: "55000000000",
+                taxaEntrega: 5.00,
+                precosPizzas: { p: 35, m: 45, g: 55, f: 70 },
+                precosBebidas: { agua: 5, aguaGas: 6, refri1l: 8, refri: 12, sucoSimples: 10, sucoLeite: 12 },
+                senhaAdmin: "123456" // Use esta senha para o seu primeiro acesso
+            });
+            console.log("✅ Configuração inicial criada com sucesso! Senha padrão: 123456");
+        }
+    })
     .catch(err => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
-// 📝 DEFINIÇÃO DOS DADOS (O que vamos salvar)
+// 📝 DEFINIÇÃO DOS DADOS ATUALIZADA
 const ConfigSchema = new mongoose.Schema({
+    statusLoja: String,
     whatsapp: String,
+    taxaEntrega: Number,
     precosPizzas: Object,
     precosBebidas: Object,
     senhaAdmin: String
 });
 const Config = mongoose.model('Config', ConfigSchema);
 
-// 🌐 ROTA PARA BUSCAR CONFIGURAÇÕES (Quando o site abre)
+// 🌐 ROTA PARA BUSCAR CONFIGURAÇÕES (O site chama isso ao carregar)
 app.get('/api/config', async (req, res) => {
     try {
-        let config = await Config.findOne();
-        if (!config) {
-            // Se o banco estiver vazio, cria o primeiro registro padrão
-            config = await Config.create({
-                whatsapp: "55000000000",
-                precosPizzas: { p: 35, m: 45, g: 55, f: 70 },
-                precosBebidas: { agua: 5, refri: 10 },
-                senhaAdmin: "123456"
-            });
-        }
+        const config = await Config.findOne();
         res.json(config);
     } catch (err) {
-        res.status(500).send("Erro ao buscar dados");
+        res.status(500).json({ erro: "Erro ao buscar dados do banco" });
     }
 });
 
-// 💾 ROTA PARA SALVAR (O que o lojista altera no painel)
+// 💾 ROTA PARA SALVAR (Usada pelo Painel Admin)
 app.post('/api/config', async (req, res) => {
     try {
         await Config.findOneAndUpdate({}, req.body, { upsert: true });
-        res.send("Configurações salvas no Banco de Dados!");
+        res.send("Configurações salvas permanentemente no MongoDB!");
     } catch (err) {
-        res.status(500).send("Erro ao salvar");
+        res.status(500).send("Erro ao salvar no banco de dados");
     }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
+// 🚀 INICIALIZAÇÃO DO SERVIDOR
+const PORT = process.env.PORT || 10000; // Render prefere porta 10000 ou automática
+app.listen(PORT, () => console.log(`🚀 Backend Pizzaria rodando na porta ${PORT}`));
