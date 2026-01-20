@@ -54,7 +54,6 @@ body {
     transition: 0.3s; 
 }
 
-/* CAIXA DA IMAGEM CORRIGIDA */
 .item-img-box { 
     height: 140px; 
     display: flex; 
@@ -102,4 +101,16 @@ body {
 .btn-send-whatsapp { background: #25D366; color: white; border: none; width: 100%; padding: 18px; font-size: 16px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 15px; }
 
 .status-indicator { padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #25D366; color: #25D366; }
-.status-indicator.fechado { border-color: var(--red); color: var(--red); }
+.status-indicator.aberto { background: rgba(37, 211, 102, 0.1); }
+.status-indicator.fechado { border-color: var(--red); color: var(--red); background: rgba(227, 27, 34, 0.1); }
+.status-indicator .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: currentColor; }
+
+.banner-promocional { background: rgba(227, 27, 34, 0.1); border: 1px solid var(--red); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+
+.resumo-total-checkout { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #2ecc71; text-align: center; }
+.resumo-total-checkout b { font-size: 24px; color: #fff; }
+
+.cart-scroll-area { max-height: 400px; overflow-y: auto; margin-bottom: 15px; }
+.cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; font-size: 14px; }
+.total-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--gray); }
+.final-total { color: white; font-weight: bold; font-size: 18px; margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; }
