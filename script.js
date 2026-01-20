@@ -1,11 +1,11 @@
+// CONFIGURAÇÃO DO BACKEND
 const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
 let configGeral = {};
 let carrinho = [];
 let itemAtual = null;
 let metodoEnvio = 'entrega';
 
-const limitesSabores = { "P": 1, "M": 2, "G": 3, "F": 3 };
-
+// CARDÁPIO DE PIZZAS
 const menuPizzas = {
     tradicionais: [
         { nome: "Calabresa", desc: "Molho, muçarela, calabresa e cebola", img: "img/pizzas/pizza 01.png" },
@@ -20,31 +20,29 @@ const menuPizzas = {
     ]
 };
 
+// --- SINCRONIZAÇÃO COM O MONGODB ---
 async function sincronizarComServidor() {
     try {
         const res = await fetch(API_URL);
         configGeral = await res.json();
         
-        // Atualiza Banner de Preços
+        // Atualiza preços no banner
         document.getElementById('v-preco-p').innerText = configGeral.precosPizzas.p.toFixed(2);
         document.getElementById('v-preco-m').innerText = configGeral.precosPizzas.m.toFixed(2);
         document.getElementById('v-preco-g').innerText = configGeral.precosPizzas.g.toFixed(2);
         document.getElementById('v-preco-f').innerText = configGeral.precosPizzas.f.toFixed(2);
         
-        document.getElementById('banner-loading').classList.add('hidden');
-        document.getElementById('banner-precos').classList.remove('hidden');
-
-        // Atualiza Status da Loja
         const statusDiv = document.getElementById('status-loja');
         statusDiv.innerHTML = `<span class="dot"></span> Loja Aberta`;
         statusDiv.className = `status-indicator aberto`;
 
         renderizarMenu();
-    } catch (e) {
-        document.getElementById('status-loja').innerText = "Erro ao conectar banco";
+    } catch (e) { 
+        console.error("Erro ao conectar banco.");
     }
 }
 
+// --- RENDERIZAÇÃO DO CARDÁPIO ---
 function renderizarMenu() {
     renderCategoria('lista-tradicionais', menuPizzas.tradicionais);
     renderCategoria('lista-gourmet', menuPizzas.gourmet);
@@ -54,9 +52,13 @@ function renderizarMenu() {
 
 function renderCategoria(id, lista) {
     const box = document.getElementById(id);
+    if(!box) return;
+    // A estrutura abaixo garante que a imagem fique dentro do retângulo e flutuando
     box.innerHTML = lista.map(item => `
         <div class="item-card">
-            <img src="${item.img}" onerror="this.src='img/pizzas/LOGO PIZZA.png'">
+            <div class="item-img-box">
+                <img src="${item.img}" onerror="this.src='img/pizzas/LOGO PIZZA.png'">
+            </div>
             <h3>${item.nome}</h3>
             <div class="size-selector">
                 <button class="btn-size" onclick="abrirModalPizza('${item.nome}', 'P')">P</button>
@@ -69,14 +71,25 @@ function renderCategoria(id, lista) {
 
 function renderBebidas() {
     const box = document.getElementById('lista-bebidas');
-    box.innerHTML = `
-        <div class="item-card"><h3>Água</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Agua')">ESCOLHER</button></div>
-        <div class="item-card"><h3>Refrigerantes</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Refri')">ESCOLHER</button></div>
-        <div class="item-card"><h3>Sucos</h3><button class="btn-checkout-next" onclick="abrirModalBebida('Suco')">ESCOLHER</button></div>`;
+    if(!box) return;
+    // Bebidas agora com as imagens que você forneceu
+    const bebidas = [
+        { nome: "Água Mineral", img: "img/bebidas/agua 01.png" },
+        { nome: "Refrigerantes", img: "img/bebidas/Refrigerantes 01.png" },
+        { nome: "Sucos Naturais", img: "img/bebidas/sucos 01.png" }
+    ];
+    box.innerHTML = bebidas.map(b => `
+        <div class="item-card">
+            <div class="item-img-box"><img src="${b.img}" onerror="this.src='img/pizzas/LOGO PIZZA.png'"></div>
+            <h3>${b.nome}</h3>
+            <button class="btn-checkout-next" onclick="alert('Escolha no WhatsApp!')">ESCOLHER</button>
+        </div>`).join('');
 }
 
+// --- LÓGICA DO CARRINHO ---
 function abrirModalPizza(nome, tam) {
-    itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limitesSabores[tam], preco: configGeral.precosPizzas[tam.toLowerCase()] };
+    const limites = { "P": 1, "M": 2, "G": 3, "F": 3 };
+    itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limites[tam], preco: configGeral.precosPizzas[tam.toLowerCase()] };
     document.getElementById('modal-title').innerText = `Pizza ${tam} - ${nome}`;
     const todos = [...menuPizzas.tradicionais, ...menuPizzas.gourmet, ...menuPizzas.doces];
     document.getElementById('modal-options').innerHTML = todos.map(s => `<label><input type="checkbox" name="selecao" value="${s.nome}"> ${s.nome}</label>`).join('');
@@ -84,11 +97,9 @@ function abrirModalPizza(nome, tam) {
 }
 
 function confirmarSelecao() {
-    if (itemAtual.tipo === 'pizza') {
-        const sel = Array.from(document.querySelectorAll('input[name="selecao"]:checked')).map(i => i.value);
-        if(sel.length === 0 || sel.length > itemAtual.limite) return alert(`Escolha de 1 a ${itemAtual.limite} sabores!`);
-        carrinho.push({ nome: `Pizza ${itemAtual.tamanho} (${sel.join('/')})`, preco: itemAtual.preco });
-    }
+    const sel = Array.from(document.querySelectorAll('input[name="selecao"]:checked')).map(i => i.value);
+    if(sel.length === 0 || sel.length > itemAtual.limite) return alert(`Escolha de 1 a ${itemAtual.limite} sabores!`);
+    carrinho.push({ nome: `Pizza ${itemAtual.tamanho} (${sel.join('/')})`, preco: itemAtual.preco });
     fecharModal();
     atualizarCarrinho();
 }
@@ -99,7 +110,6 @@ function atualizarCarrinho() {
         sub += i.preco; 
         return `<div class="cart-item"><span>${i.nome}</span> <b>R$ ${i.preco.toFixed(2)}</b></div>`;
     }).join('');
-    
     document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
     const taxa = (metodoEnvio === 'entrega' && sub > 0) ? configGeral.taxaEntrega : 0;
     document.getElementById('v-taxa-entrega').innerText = `R$ ${taxa.toFixed(2)}`;
@@ -107,6 +117,7 @@ function atualizarCarrinho() {
     document.getElementById('checkout-total-exibicao').innerText = `R$ ${(sub + taxa).toFixed(2)}`;
 }
 
+// --- CHECKOUT E WHATSAPP ---
 function setMetodo(tipo) {
     metodoEnvio = tipo;
     document.getElementById('btn-entrega').className = tipo === 'entrega' ? 'active' : '';
@@ -119,14 +130,27 @@ function mudarPagina(p) {
     if(p === 'checkout' && carrinho.length === 0) return alert("Carrinho vazio!");
     document.getElementById('page-menu').classList.toggle('hidden', p !== 'menu');
     document.getElementById('page-checkout').classList.toggle('hidden', p !== 'checkout');
+    window.scrollTo(0,0);
 }
 
 function enviarPedidoWhatsApp() {
     const nome = document.getElementById('nome_cliente').value;
     if(!nome) return alert("Informe seu nome!");
-    let msg = `*🍕 NOVO PEDIDO*\n*Cliente:* ${nome}\n*Método:* ${metodoEnvio.toUpperCase()}\n\n*ITENS:*\n`;
-    carrinho.forEach(i => msg += `- ${i.nome}\n`);
-    msg += `\n*TOTAL:* ${document.getElementById('total-geral').innerText}`;
+    
+    let msg = `*🍕 NOVO PEDIDO - PIZZARIA MALUCA*\n*Cliente:* ${nome}\n*Método:* ${metodoEnvio.toUpperCase()}\n`;
+    
+    if(metodoEnvio === 'entrega') {
+        const rua = document.getElementById('rua_cliente').value;
+        const num = document.getElementById('num_cliente').value;
+        const bairro = document.getElementById('bairro_cliente').value;
+        const ref = document.getElementById('ref_cliente').value; // CAMPO DE REFERÊNCIA
+        msg += `*Endereço:* ${rua}, nº ${num} - ${bairro}\n*Referência:* ${ref || 'Não informada'}\n`;
+    }
+
+    msg += `\n*ITENS:*\n`;
+    carrinho.forEach(i => msg += `- ${i.nome} (R$ ${i.preco.toFixed(2)})\n`);
+    msg += `\n*TOTAL FINAL:* ${document.getElementById('total-geral').innerText}`;
+    
     window.open(`https://api.whatsapp.com/send?phone=${configGeral.whatsapp}&text=${encodeURIComponent(msg)}`);
 }
 
