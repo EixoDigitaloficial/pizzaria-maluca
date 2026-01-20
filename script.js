@@ -3,6 +3,7 @@ let configGeral = {};
 let precosPizza = {}; 
 let carrinho = [];
 let itemAtual = null; 
+let metodoEnvio = 'entrega'; // Padrão inicial
 
 const limitesSabores = { "P": 1, "M": 2, "G": 3, "F": 3 };
 
@@ -37,11 +38,27 @@ async function sincronizarComServidor() {
             statusDiv.className = `status-indicator ${configGeral.statusLoja}`;
         }
 
-        const taxaEntregaEl = document.getElementById('v-taxa-entrega');
-        if(taxaEntregaEl) taxaEntregaEl.innerText = `R$ ${configGeral.taxaEntrega.toFixed(2)}`;
-
         renderizarMenu();
+        atualizarCarrinho(); 
     } catch (e) { console.error("Erro ao conectar ao servidor."); }
+}
+
+function setMetodo(tipo) {
+    metodoEnvio = tipo;
+    
+    document.getElementById('btn-entrega').classList.toggle('active', tipo === 'entrega');
+    document.getElementById('btn-retirada').classList.toggle('active', tipo === 'retirada');
+    
+    const camposEnd = document.getElementById('campos-endereco');
+    camposEnd.classList.toggle('hidden', tipo === 'retirada');
+    
+    atualizarCarrinho(); 
+    
+    // Atualiza o total destacado no checkout se o usuário mudar a opção na tela final
+    const checkoutTotalExibicao = document.getElementById('checkout-total-exibicao');
+    if (checkoutTotalExibicao) {
+        checkoutTotalExibicao.innerText = document.getElementById('total-geral').innerText;
+    }
 }
 
 function renderizarMenu() {
@@ -94,7 +111,6 @@ function renderBebidas() {
     document.getElementById('btn-suco').onclick = () => abrirModalBebida('Suco');
 }
 
-// --- 2. MODAIS E SELEÇÃO ---
 function abrirModalPizza(nome, tam) {
     itemAtual = { tipo: 'pizza', nome, tamanho: tam, limite: limitesSabores[tam], preco: precosPizza[tam] };
     document.getElementById('modal-title').innerText = `Pizza ${tam} - ${nome}`;
@@ -138,7 +154,6 @@ function abrirModalBebida(tipo) {
     document.getElementById('modal-selecao').classList.remove('hidden');
 }
 
-// --- 3. CARRINHO E FINALIZAÇÃO ---
 function confirmarSelecao() {
     if (!itemAtual) return;
 
@@ -180,14 +195,23 @@ function atualizarCarrinho() {
     if(carrinho.length === 0) itensDiv.innerHTML = '<p class="empty-msg">Escolha seus sabores favoritos!</p>';
     
     document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
-    const entrega = sub > 0 ? configGeral.taxaEntrega : 0;
-    document.getElementById('total-geral').innerText = `R$ ${(sub + entrega).toFixed(2)}`;
+    
+    const taxaReal = (metodoEnvio === 'entrega' && sub > 0) ? configGeral.taxaEntrega : 0;
+    document.getElementById('v-taxa-entrega').innerText = `R$ ${taxaReal.toFixed(2)}`;
+    document.getElementById('total-geral').innerText = `R$ ${(sub + taxaReal).toFixed(2)}`;
 }
 
 function fecharModal() { document.getElementById('modal-selecao').classList.add('hidden'); }
 function limparCarrinho() { carrinho = []; atualizarCarrinho(); }
+
 function mudarPagina(p) { 
     if(p === 'checkout' && carrinho.length === 0) return alert("Carrinho vazio!");
+    
+    // Sincroniza o total em destaque ao abrir o checkout
+    if(p === 'checkout') {
+        document.getElementById('checkout-total-exibicao').innerText = document.getElementById('total-geral').innerText;
+    }
+
     document.getElementById('page-menu').classList.toggle('hidden', p !== 'menu');
     document.getElementById('page-checkout').classList.toggle('hidden', p !== 'checkout');
     window.scrollTo(0,0);
@@ -195,13 +219,35 @@ function mudarPagina(p) {
 
 function enviarPedidoWhatsApp() {
     const n = document.getElementById('nome_cliente').value;
-    const e = document.getElementById('endereco_cliente').value;
-    const p = document.getElementById('pagamento_cliente').value;
-    if(!n || !e) return alert("Preencha seu nome e endereço!");
+    const pag = document.getElementById('pagamento_cliente').value;
     
-    let msg = `*🍕 NOVO PEDIDO - PIZZARIA MALUCA*\n*Cliente:* ${n}\n*Endereço:* ${e}\n*Pagamento:* ${p}\n\n*ITENS:*\n`;
+    if(!n) return alert("Por favor, informe seu nome!");
+
+    let enderecoFinal = "";
+    if(metodoEnvio === 'entrega') {
+        const rua = document.getElementById('rua_cliente').value;
+        const num = document.getElementById('num_cliente').value;
+        const bairro = document.getElementById('bairro_cliente').value;
+        const ref = document.getElementById('ref_cliente').value;
+        
+        if(!rua || !num || !bairro) return alert("Preencha o endereço completo para entrega!");
+        enderecoFinal = `${rua}, nº ${num} - ${bairro} (Ref: ${ref || 'Não informado'})`;
+    } else {
+        enderecoFinal = "RETIRADA NA LOJA";
+    }
+    
+    let msg = `*🍕 NOVO PEDIDO - PIZZARIA MALUCA*\n`;
+    msg += `*Cliente:* ${n}\n`;
+    msg += `*Método:* ${metodoEnvio.toUpperCase()}\n`;
+    msg += `*Endereço:* ${enderecoFinal}\n`;
+    msg += `*Pagamento:* ${pag}\n\n`;
+    msg += `*ITENS:*\n`;
+    
     carrinho.forEach(i => msg += `- ${i.nome} (R$ ${i.preco.toFixed(2)})\n`);
-    msg += `\n*TOTAL:* ${document.getElementById('total-geral').innerText}`;
+    
+    msg += `\n*Total Itens:* R$ ${document.getElementById('subtotal').innerText}`;
+    msg += `\n*Taxa Entrega:* ${document.getElementById('v-taxa-entrega').innerText}`;
+    msg += `\n*TOTAL FINAL:* ${document.getElementById('total-geral').innerText}`;
     
     window.open(`https://api.whatsapp.com/send?phone=${configGeral.whatsapp}&text=${encodeURIComponent(msg)}`);
 }

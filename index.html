@@ -6,6 +6,26 @@
     <title>Pizzaria Maluca - Cardápio Digital</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos rápidos para os novos campos */
+        .metodo-envio { display: flex; gap: 10px; margin-bottom: 20px; }
+        .metodo-envio button { flex: 1; padding: 12px; border: 1px solid #e74c3c; background: transparent; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .metodo-envio button.active { background: #e74c3c; }
+        .hidden { display: none !important; }
+        .grid-endereco { display: grid; grid-template-columns: 3fr 1fr; gap: 10px; }
+        
+        /* Estilo do novo resumo de total no checkout */
+        .resumo-total-checkout {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2ecc71;
+            text-align: center;
+        }
+        .resumo-total-checkout span { color: #aaa; font-size: 14px; display: block; margin-bottom: 5px; }
+        .resumo-total-checkout b { font-size: 24px; color: #fff; display: block; }
+    </style>
 </head>
 <body>
 
@@ -62,9 +82,30 @@
     <main id="page-checkout" class="container hidden">
         <div class="checkout-card">
             <button class="back-link" onclick="mudarPagina('menu')"><i class="fas fa-chevron-left"></i> Voltar</button>
-            <h2 class="checkout-title">Dados para Entrega</h2>
-            <div class="form-field"><label>Nome Completo</label><input type="text" id="nome_cliente" placeholder="Seu nome"></div>
-            <div class="form-field"><label>Endereço</label><input type="text" id="endereco_cliente" placeholder="Rua, número, bairro"></div>
+            <h2 class="checkout-title">Finalizar Pedido</h2>
+
+            <div class="resumo-total-checkout">
+                <span>Total do seu pedido:</span>
+                <b id="checkout-total-exibicao">R$ 0,00</b>
+            </div>
+            
+            <div class="form-field"><label>Seu Nome</label><input type="text" id="nome_cliente" placeholder="Como te chamamos?"></div>
+            
+            <label>Como deseja receber?</label>
+            <div class="metodo-envio">
+                <button id="btn-entrega" class="active" onclick="setMetodo('entrega')">ENTREGA</button>
+                <button id="btn-retirada" onclick="setMetodo('retirada')">RETIRADA</button>
+            </div>
+
+            <div id="campos-endereco">
+                <div class="grid-endereco">
+                    <div class="form-field"><label>Rua/Logradouro</label><input type="text" id="rua_cliente" placeholder="Nome da rua"></div>
+                    <div class="form-field"><label>Nº</label><input type="text" id="num_cliente" placeholder="123"></div>
+                </div>
+                <div class="form-field"><label>Bairro</label><input type="text" id="bairro_cliente" placeholder="Seu bairro"></div>
+                <div class="form-field"><label>Ponto de Referência</label><input type="text" id="ref_cliente" placeholder="Ex: Próximo à padaria"></div>
+            </div>
+
             <div class="form-field"><label>Pagamento</label>
                 <select id="pagamento_cliente">
                     <option value="Dinheiro">Dinheiro</option>

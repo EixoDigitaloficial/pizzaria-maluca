@@ -29,17 +29,9 @@
             <h1 style="font-size: 22px;">Painel de Controle</h1>
         </header>
 
-        <div id="status-atual" class="status-badge">Carregando...</div>
+        <div id="status-atual" class="status-badge">Conectando ao Banco...</div>
 
         <form id="form-admin">
-            <div class="form-group">
-                <label>Status da Loja:</label>
-                <select id="statusLoja">
-                    <option value="aberto">Aberta (Aceitando Pedidos)</option>
-                    <option value="fechado">Fechada (Apenas Visualização)</option>
-                </select>
-            </div>
-
             <div class="form-group">
                 <label>WhatsApp (com DDD):</label>
                 <input type="text" id="whatsapp" placeholder="Ex: 5511999999999">
@@ -74,7 +66,7 @@
                 <input type="password" id="novaSenha" placeholder="Digite para mudar ou deixe vazio">
             </div>
 
-            <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR ALTERAÇÕES</button>
+            <button type="button" class="btn-salvar" onclick="salvarConfiguracoes()">SALVAR NO BANCO DE DADOS</button>
         </form>
     </div>
 
@@ -82,7 +74,8 @@
         if (localStorage.getItem('admin_logado') !== 'true') { window.location.href = "login.html"; }
         function logout() { localStorage.removeItem('admin_logado'); window.location.href = "login.html"; }
 
-        const API_URL = "https://pizzaria-maluca.onrender.com/api/config";
+        // Rota local para o servidor que está conectado ao MongoDB
+        const API_URL = "/api/config";
         let senhaAtualServidor = "";
 
         async function carregarDados() {
@@ -90,75 +83,77 @@
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 
-                // Armazena a senha atual para o caso do campo ficar vazio
-                senhaAtualServidor = data.senhaMestre;
+                senhaAtualServidor = data.senhaAdmin || "123456";
 
-                document.getElementById('statusLoja').value = data.statusLoja;
-                document.getElementById('whatsapp').value = data.whatsapp;
-                document.getElementById('taxaEntrega').value = data.taxaEntrega;
+                document.getElementById('whatsapp').value = data.whatsapp || "";
+                document.getElementById('taxaEntrega').value = data.taxaEntrega || 0;
                 
-                document.getElementById('precoP').value = data.precos.P;
-                document.getElementById('precoM').value = data.precos.M;
-                document.getElementById('precoG').value = data.precos.G;
-                document.getElementById('precoF').value = data.precos.F;
+                if(data.precosPizzas) {
+                    document.getElementById('precoP').value = data.precosPizzas.p;
+                    document.getElementById('precoM').value = data.precosPizzas.m;
+                    document.getElementById('precoG').value = data.precosPizzas.g;
+                    document.getElementById('precoF').value = data.precosPizzas.f;
+                }
 
-                if(data.bebidas) {
-                    document.getElementById('aguasemGas').value = data.bebidas.aguasemGas;
-                    document.getElementById('AguacomGas').value = data.bebidas.AguacomGas;
-                    document.getElementById('refri1l').value = data.bebidas.refri1l;
-                    document.getElementById('refri2l').value = data.bebidas.refri2l;
-                    document.getElementById('sucosemLeite').value = data.bebidas.sucosemLeite;
-                    document.getElementById('sucocomLeite').value = data.bebidas.sucocomLeite;
+                if(data.precosBebidas) {
+                    document.getElementById('aguasemGas').value = data.precosBebidas.agua || 0;
+                    document.getElementById('AguacomGas').value = data.precosBebidas.aguaGas || 0;
+                    document.getElementById('refri1l').value = data.precosBebidas.refri1l || 0;
+                    document.getElementById('refri2l').value = data.precosBebidas.refri || 0;
+                    document.getElementById('sucosemLeite').value = data.precosBebidas.sucoSimples || 0;
+                    document.getElementById('sucocomLeite').value = data.precosBebidas.sucoLeite || 0;
                 }
 
                 const badge = document.getElementById('status-atual');
-                badge.innerText = `Loja está: ${data.statusLoja}`;
-                badge.className = `status-badge ${data.statusLoja}`;
-            } catch (error) { console.error("Erro ao carregar:", error); }
+                badge.innerText = `✅ Sistema Online (MongoDB)`;
+                badge.className = `status-badge aberto`;
+            } catch (error) { 
+                console.error("Erro ao carregar:", error);
+                document.getElementById('status-atual').innerText = "❌ Erro de Conexão";
+                document.getElementById('status-atual').className = `status-badge fechado`;
+            }
         }
 
         async function salvarConfiguracoes() {
             const btn = document.querySelector('.btn-salvar');
             const novaSenhaCampo = document.getElementById('novaSenha').value;
             
-            btn.innerText = "SALVANDO...";
+            btn.innerText = "GRAVANDO NO BANCO...";
             btn.disabled = true;
 
             const config = {
-                statusLoja: document.getElementById('statusLoja').value,
                 whatsapp: document.getElementById('whatsapp').value,
-                taxaEntrega: parseFloat(document.getElementById('taxaEntrega').value),
-                precos: {
-                    P: parseFloat(document.getElementById('precoP').value),
-                    M: parseFloat(document.getElementById('precoM').value),
-                    G: parseFloat(document.getElementById('precoG').value),
-                    F: parseFloat(document.getElementById('precoF').value)
+                taxaEntrega: parseFloat(document.getElementById('taxaEntrega').value) || 0,
+                precosPizzas: {
+                    p: parseFloat(document.getElementById('precoP').value),
+                    m: parseFloat(document.getElementById('precoM').value),
+                    g: parseFloat(document.getElementById('precoG').value),
+                    f: parseFloat(document.getElementById('precoF').value)
                 },
-                bebidas: {
-                    aguasemGas: parseFloat(document.getElementById('aguasemGas').value),
-                    AguacomGas: parseFloat(document.getElementById('AguacomGas').value),
+                precosBebidas: {
+                    agua: parseFloat(document.getElementById('aguasemGas').value),
+                    aguaGas: parseFloat(document.getElementById('AguacomGas').value),
                     refri1l: parseFloat(document.getElementById('refri1l').value),
-                    refri2l: parseFloat(document.getElementById('refri2l').value),
-                    sucosemLeite: parseFloat(document.getElementById('sucosemLeite').value),
-                    sucocomLeite: parseFloat(document.getElementById('sucocomLeite').value)
+                    refri: parseFloat(document.getElementById('refri2l').value),
+                    sucoSimples: parseFloat(document.getElementById('sucosemLeite').value),
+                    sucoLeite: parseFloat(document.getElementById('sucocomLeite').value)
                 },
-                // Atualiza a senha se o campo for preenchido
-                senhaMestre: novaSenhaCampo.trim() !== "" ? novaSenhaCampo : senhaAtualServidor
+                senhaAdmin: novaSenhaCampo.trim() !== "" ? novaSenhaCampo : senhaAtualServidor
             };
 
             try {
-                const res = await fetch(`${API_URL}/atualizar`, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(config)
                 });
                 if(res.ok) { 
-                    alert("Dados salvos com sucesso!"); 
+                    alert("Dados salvos com segurança no MongoDB!"); 
                     document.getElementById('novaSenha').value = "";
                     carregarDados(); 
                 }
-            } catch (error) { alert("Erro ao salvar!"); }
-            finally { btn.innerText = "SALVAR ALTERAÇÕES"; btn.disabled = false; }
+            } catch (error) { alert("Erro ao salvar no banco!"); }
+            finally { btn.innerText = "SALVAR NO BANCO DE DADOS"; btn.disabled = false; }
         }
         window.onload = carregarDados;
     </script>
